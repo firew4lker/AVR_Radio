@@ -1,0 +1,42 @@
+# depslib dependency file v1.0
+1524823184 source:/koko/AVR_Radio/Firmware/AVR_Radio/main.c
+	<avr/io.h>
+	<stdlib.h>
+	<stdio.h>
+	<avr/pgmspace.h>
+	<util/delay.h>
+	<string.h>
+	"hd44780.h"
+	"SanyoCCB.h"
+	"bit_manipulation.h"
+
+1334328161 source:/koko/AVR_Radio/Firmware/AVR_Radio/hd44780.c
+	<avr/pgmspace.h>
+	"hd44780.h"
+	<avr/sfr_defs.h>
+	"adelay.h"
+
+1334328092 /koko/AVR_Radio/Firmware/AVR_Radio/hd44780.h
+	"hd44780_settings.h"
+	"inttypes.h"
+
+1524737025 /koko/AVR_Radio/Firmware/AVR_Radio/hd44780_settings.h
+
+1524743520 source:/koko/AVR_Radio/Firmware/AVR_Radio/bit_manipulation.c
+	<avr/io.h>
+	<stdlib.h>
+	<stdio.h>
+	"bit_manipulation.h"
+
+1524743511 /koko/AVR_Radio/Firmware/AVR_Radio/bit_manipulation.h
+
+1524743661 source:/koko/AVR_Radio/Firmware/AVR_Radio/SanyoCCB.c
+	<avr/io.h>
+	<inttypes.h>
+	<util/delay.h>
+	"SanyoCCB.h"
+	"bit_manipulation.h"
+
+1524749676 /koko/AVR_Radio/Firmware/AVR_Radio/SanyoCCB.h
+	<inttypes.h>
+
