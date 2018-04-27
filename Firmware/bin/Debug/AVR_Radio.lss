@@ -3,27 +3,27 @@ bin/Debug/AVR_Radio.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000016  00800100  000006d0  00000764  2**0
+  0 .data         00000016  00800100  0000063a  000006ce  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         000006d0  00000000  00000000  00000094  2**1
+  1 .text         0000063a  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000007  00800116  00800116  0000077a  2**0
+  2 .bss          00000007  00800116  00800116  000006e4  2**0
                   ALLOC
-  3 .stab         0000222c  00000000  00000000  0000077c  2**2
+  3 .stab         000020d0  00000000  00000000  000006e4  2**2
                   CONTENTS, READONLY, DEBUGGING
-  4 .stabstr      00001309  00000000  00000000  000029a8  2**0
+  4 .stabstr      000012bf  00000000  00000000  000027b4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .comment      00000011  00000000  00000000  00003cb1  2**0
+  5 .comment      00000011  00000000  00000000  00003a73  2**0
                   CONTENTS, READONLY
-  6 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00003cc4  2**2
+  6 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00003a84  2**2
                   CONTENTS, READONLY
-  7 .debug_info   000005f4  00000000  00000000  00003d04  2**0
+  7 .debug_info   000005f4  00000000  00000000  00003ac4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_abbrev 000005a2  00000000  00000000  000042f8  2**0
+  8 .debug_abbrev 000005a2  00000000  00000000  000040b8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_line   0000001d  00000000  00000000  0000489a  2**0
+  9 .debug_line   0000001d  00000000  00000000  0000465a  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000208  00000000  00000000  000048b7  2**0
+ 10 .debug_str    00000208  00000000  00000000  00004677  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -68,7 +68,7 @@ Disassembly of section .text:
   74:	11 e0       	ldi	r17, 0x01	; 1
   76:	a0 e0       	ldi	r26, 0x00	; 0
   78:	b1 e0       	ldi	r27, 0x01	; 1
-  7a:	e0 ed       	ldi	r30, 0xD0	; 208
+  7a:	ea e3       	ldi	r30, 0x3A	; 58
   7c:	f6 e0       	ldi	r31, 0x06	; 6
   7e:	02 c0       	rjmp	.+4      	; 0x84 <__do_copy_data+0x10>
   80:	05 90       	lpm	r0, Z+
@@ -90,8 +90,8 @@ Disassembly of section .text:
   94:	ad 31       	cpi	r26, 0x1D	; 29
   96:	b2 07       	cpc	r27, r18
   98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
-  9a:	0e 94 2b 03 	call	0x656	; 0x656 <main>
-  9e:	0c 94 66 03 	jmp	0x6cc	; 0x6cc <_exit>
+  9a:	0e 94 03 03 	call	0x606	; 0x606 <main>
+  9e:	0c 94 1b 03 	jmp	0x636	; 0x636 <_exit>
 
 000000a2 <__bad_interrupt>:
   a2:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
@@ -658,683 +658,598 @@ void lcd_init()
  2dc:	8c e0       	ldi	r24, 0x0C	; 12
  2de:	0c 94 ce 00 	jmp	0x19c	; 0x19c <lcd_command>
 
-000002e2 <PLL_Init>:
- * Initialize the PLL settings vectors with     *
- * parameters common to booth AM and FM modes   *
-\************************************************/
-void PLL_Init() {
-
-    pll_in1[0]=0;   // Zeroing byte 0 of pll_in1.
- 2e2:	ea e1       	ldi	r30, 0x1A	; 26
- 2e4:	f1 e0       	ldi	r31, 0x01	; 1
- 2e6:	10 82       	st	Z, r1
-    pll_in1[1]=0;   // Zeroing byte 1 of pll_in1.
- 2e8:	11 82       	std	Z+1, r1	; 0x01
-    pll_in1[2]=0;   // Zeroing byte 2 of pll_in1.
- 2ea:	12 82       	std	Z+2, r1	; 0x02
-
-    pll_in2[0]=0;   // Zeroing byte 0 of pll_in2.
-    pll_in2[1]=0;   // Zeroing byte 1 of pll_in2.
-    pll_in2[2]=0;   // Zeroing byte 2 of pll_in2.
-
-    bitSet(pll_in2[0], IN2_IFS);   // IF counter in normal mode. Page 12 and 15 of the Datasheet.
- 2ec:	e7 e1       	ldi	r30, 0x17	; 23
- 2ee:	f1 e0       	ldi	r31, 0x01	; 1
- 2f0:	80 e1       	ldi	r24, 0x10	; 16
- 2f2:	80 83       	st	Z, r24
-    bitSet(pll_in2[1], IN2_UL0);   // Phase error detection width = 0us. UL1=0, UL0=1. Page 11 of the Datasheet.
- 2f4:	81 83       	std	Z+1, r24	; 0x01
-    bitSet(pll_in2[2], IN2_BO2);   // Mute off / normal tuner mode
- 2f6:	80 e2       	ldi	r24, 0x20	; 32
- 2f8:	82 83       	std	Z+2, r24	; 0x02
-}
- 2fa:	08 95       	ret
-
-000002fc <PLL_SetMode>:
-
-void PLL_SetMode(uint8_t mode) {
-
-  switch(mode) {
- 2fc:	83 30       	cpi	r24, 0x03	; 3
- 2fe:	c1 f1       	breq	.+112    	; 0x370 <PLL_SetMode+0x74>
- 300:	80 f4       	brcc	.+32     	; 0x322 <PLL_SetMode+0x26>
- 302:	81 30       	cpi	r24, 0x01	; 1
- 304:	89 f1       	breq	.+98     	; 0x368 <PLL_SetMode+0x6c>
- 306:	82 30       	cpi	r24, 0x02	; 2
- 308:	49 f1       	breq	.+82     	; 0x35c <PLL_SetMode+0x60>
-      bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone = DZC
-      bitWrite(pll_in2[1], IN2_DZ1, 1); //
-      bitWrite(pll_in2[2], IN2_BO1, 1); // AM mode
-      break;
-  }
-  LC72131_write(0x82, pll_in1, 3);
- 30a:	43 e0       	ldi	r20, 0x03	; 3
- 30c:	6a e1       	ldi	r22, 0x1A	; 26
- 30e:	71 e0       	ldi	r23, 0x01	; 1
- 310:	82 e8       	ldi	r24, 0x82	; 130
- 312:	0e 94 25 03 	call	0x64a	; 0x64a <LC72131_write>
-  LC72131_write(0x92, pll_in2, 3);
- 316:	43 e0       	ldi	r20, 0x03	; 3
- 318:	67 e1       	ldi	r22, 0x17	; 23
- 31a:	71 e0       	ldi	r23, 0x01	; 1
- 31c:	82 e9       	ldi	r24, 0x92	; 146
- 31e:	0c 94 25 03 	jmp	0x64a	; 0x64a <LC72131_write>
-  switch(mode) {
- 322:	85 30       	cpi	r24, 0x05	; 5
- 324:	69 f1       	breq	.+90     	; 0x380 <PLL_SetMode+0x84>
- 326:	40 f1       	brcs	.+80     	; 0x378 <PLL_SetMode+0x7c>
- 328:	86 30       	cpi	r24, 0x06	; 6
- 32a:	79 f7       	brne	.-34     	; 0x30a <PLL_SetMode+0xe>
-      band = PLL_BAND_AM;
- 32c:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <band>
-      bitWrite(pll_in1[0], IN1_DVS, 0); // Programmable Divider divisor = 1
- 330:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
- 334:	8d 7e       	andi	r24, 0xED	; 237
- 336:	80 68       	ori	r24, 0x80	; 128
- 338:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
-      bitWrite(pll_in2[0], IN2_GT1, 0); //
- 33c:	80 91 17 01 	lds	r24, 0x0117	; 0x800117 <pll_in2>
- 340:	8d 7f       	andi	r24, 0xFD	; 253
- 342:	81 60       	ori	r24, 0x01	; 1
- 344:	80 93 17 01 	sts	0x0117, r24	; 0x800117 <pll_in2>
-      bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone = DZC
- 348:	80 91 18 01 	lds	r24, 0x0118	; 0x800118 <pll_in2+0x1>
- 34c:	8f 7b       	andi	r24, 0xBF	; 191
-      bitWrite(pll_in2[1], IN2_DZ1, 1); //
- 34e:	80 68       	ori	r24, 0x80	; 128
- 350:	80 93 18 01 	sts	0x0118, r24	; 0x800118 <pll_in2+0x1>
-      bitWrite(pll_in2[2], IN2_BO1, 1); // AM mode
- 354:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
- 358:	80 61       	ori	r24, 0x10	; 16
- 35a:	03 c0       	rjmp	.+6      	; 0x362 <PLL_SetMode+0x66>
-      bitClear(pll_in2[2], IN2_BO3);
- 35c:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
- 360:	8f 7b       	andi	r24, 0xBF	; 191
-      bitWrite(pll_in2[2], IN2_BO1, 1); // AM mode
- 362:	80 93 19 01 	sts	0x0119, r24	; 0x800119 <pll_in2+0x2>
-      break;
- 366:	d1 cf       	rjmp	.-94     	; 0x30a <PLL_SetMode+0xe>
-      bitSet(pll_in2[2], IN2_BO3);
- 368:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
- 36c:	80 64       	ori	r24, 0x40	; 64
- 36e:	f9 cf       	rjmp	.-14     	; 0x362 <PLL_SetMode+0x66>
-      bitClear(pll_in2[2], IN2_BO2);
- 370:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
- 374:	8f 7d       	andi	r24, 0xDF	; 223
- 376:	f5 cf       	rjmp	.-22     	; 0x362 <PLL_SetMode+0x66>
-      bitSet(pll_in2[2], IN2_BO2);
- 378:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
- 37c:	80 62       	ori	r24, 0x20	; 32
- 37e:	f1 cf       	rjmp	.-30     	; 0x362 <PLL_SetMode+0x66>
-      band = PLL_BAND_FM;
- 380:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <band>
-      bitWrite(pll_in1[0], IN1_DVS, 1); // Programmable Divider divisor = 2
- 384:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
- 388:	8f 77       	andi	r24, 0x7F	; 127
- 38a:	8a 61       	ori	r24, 0x1A	; 26
- 38c:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
-      bitWrite(pll_in2[0], IN2_GT0, 0); // IF counter mesurement period = 32ms
- 390:	80 91 17 01 	lds	r24, 0x0117	; 0x800117 <pll_in2>
- 394:	8e 7f       	andi	r24, 0xFE	; 254
-      bitWrite(pll_in2[0], IN2_GT1, 1); //
- 396:	82 60       	ori	r24, 0x02	; 2
- 398:	80 93 17 01 	sts	0x0117, r24	; 0x800117 <pll_in2>
-      bitWrite(pll_in2[1], IN2_DZ1, 0); //
- 39c:	80 91 18 01 	lds	r24, 0x0118	; 0x800118 <pll_in2+0x1>
- 3a0:	8f 77       	andi	r24, 0x7F	; 127
- 3a2:	80 64       	ori	r24, 0x40	; 64
- 3a4:	80 93 18 01 	sts	0x0118, r24	; 0x800118 <pll_in2+0x1>
-      bitWrite(pll_in2[2], IN2_BO1, 0); // FM mode
- 3a8:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
- 3ac:	8f 7e       	andi	r24, 0xEF	; 239
- 3ae:	d9 cf       	rjmp	.-78     	; 0x362 <PLL_SetMode+0x66>
-
-000003b0 <PLL_Tune>:
- * representation can be directly sent to the PLL and is    *
- * easy to represent:                                       *
- * - FM mode (divisor = 100): frequency (MHz) * 10          *
- * - AM mode (divisor = 10):  frequency (kHZ) / 10          *
-\************************************************************/
-uint8_t PLL_Tune(uint16_t frequency) {
- 3b0:	0f 93       	push	r16
- 3b2:	1f 93       	push	r17
- 3b4:	cf 93       	push	r28
- 3b6:	df 93       	push	r29
- 3b8:	00 d0       	rcall	.+0      	; 0x3ba <PLL_Tune+0xa>
- 3ba:	1f 92       	push	r1
- 3bc:	cd b7       	in	r28, 0x3d	; 61
- 3be:	de b7       	in	r29, 0x3e	; 62
-
-    uint16_t fpd = 0;
-    uint8_t i = 0;
-    uint8_t r[3];
-
-    switch(band) {
- 3c0:	20 91 00 01 	lds	r18, 0x0100	; 0x800100 <band>
- 3c4:	25 30       	cpi	r18, 0x05	; 5
- 3c6:	29 f0       	breq	.+10     	; 0x3d2 <PLL_Tune+0x22>
- 3c8:	26 30       	cpi	r18, 0x06	; 6
- 3ca:	09 f4       	brne	.+2      	; 0x3ce <PLL_Tune+0x1e>
- 3cc:	48 c0       	rjmp	.+144    	; 0x45e <__FUSE_REGION_LENGTH__+0x5e>
-        case PLL_BAND_AM:
-        // AM: fpd = ((frequency + FI) / 10) << 4
-        fpd = (frequency + 45) << 4;
-        break;
-
-        default: return 1;
- 3ce:	81 e0       	ldi	r24, 0x01	; 1
- 3d0:	3e c0       	rjmp	.+124    	; 0x44e <__FUSE_REGION_LENGTH__+0x4e>
-        fpd = (frequency + 107);
- 3d2:	8c 01       	movw	r16, r24
- 3d4:	05 59       	subi	r16, 0x95	; 149
- 3d6:	1f 4f       	sbci	r17, 0xFF	; 255
-    }
-
-    PLL_SetMode(PLL_MUTE);   // YST93x only injects FI signal into the PLL when in MUTE mode
- 3d8:	83 e0       	ldi	r24, 0x03	; 3
- 3da:	0e 94 7e 01 	call	0x2fc	; 0x2fc <PLL_SetMode>
-
-    // Reset the IF counter and program the Frequency Programmable Divider (fpd)
-    bitClear(pll_in1[0], IN1_CTE);
- 3de:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
- 3e2:	8b 7f       	andi	r24, 0xFB	; 251
- 3e4:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
-    pll_in1[1] = (uint8_t) (fpd >> 8);
- 3e8:	10 93 1b 01 	sts	0x011B, r17	; 0x80011b <pll_in1+0x1>
-    pll_in1[2] =  (uint8_t) (fpd & 0x00ff);
- 3ec:	00 93 1c 01 	sts	0x011C, r16	; 0x80011c <pll_in1+0x2>
-    LC72131_write(0x82, pll_in1, 3);
- 3f0:	43 e0       	ldi	r20, 0x03	; 3
- 3f2:	6a e1       	ldi	r22, 0x1A	; 26
- 3f4:	71 e0       	ldi	r23, 0x01	; 1
- 3f6:	82 e8       	ldi	r24, 0x82	; 130
- 3f8:	0e 94 25 03 	call	0x64a	; 0x64a <LC72131_write>
-
-    // Start the IF counter
-    bitSet(pll_in1[0], IN1_CTE);
- 3fc:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
- 400:	84 60       	ori	r24, 0x04	; 4
- 402:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
-    LC72131_write(0x82, pll_in1, 3);
- 406:	43 e0       	ldi	r20, 0x03	; 3
- 408:	6a e1       	ldi	r22, 0x1A	; 26
- 40a:	71 e0       	ldi	r23, 0x01	; 1
- 40c:	82 e8       	ldi	r24, 0x82	; 130
- 40e:	0e 94 25 03 	call	0x64a	; 0x64a <LC72131_write>
- 412:	12 e3       	ldi	r17, 0x32	; 50
-	#else
-		//round up by default
-		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
-	#endif
-
-	__builtin_avr_delay_cycles(__ticks_dc);
- 414:	8f e3       	ldi	r24, 0x3F	; 63
- 416:	9c e9       	ldi	r25, 0x9C	; 156
- 418:	01 97       	sbiw	r24, 0x01	; 1
- 41a:	f1 f7       	brne	.-4      	; 0x418 <__FUSE_REGION_LENGTH__+0x18>
- 41c:	00 c0       	rjmp	.+0      	; 0x41e <__FUSE_REGION_LENGTH__+0x1e>
- 41e:	00 00       	nop
-
-    // Wait for PLL to be locked (DO_UL == 1)
-    while(i < 50) {
-        _delay_ms(10);
-        LC72131_read(0xa2, r, 3);  // Discard the 1st result: it is latched from the last count (as said on the datasheet)
- 420:	43 e0       	ldi	r20, 0x03	; 3
- 422:	be 01       	movw	r22, r28
- 424:	6f 5f       	subi	r22, 0xFF	; 255
- 426:	7f 4f       	sbci	r23, 0xFF	; 255
- 428:	82 ea       	ldi	r24, 0xA2	; 162
- 42a:	0e 94 28 03 	call	0x650	; 0x650 <LC72131_read>
-        LC72131_read(0xa2, r, 3);  // The 20 rightmost bits from r[0..2] are the IF counter result
- 42e:	43 e0       	ldi	r20, 0x03	; 3
- 430:	be 01       	movw	r22, r28
- 432:	6f 5f       	subi	r22, 0xFF	; 255
- 434:	7f 4f       	sbci	r23, 0xFF	; 255
- 436:	82 ea       	ldi	r24, 0xA2	; 162
- 438:	0e 94 28 03 	call	0x650	; 0x650 <LC72131_read>
-        i = (bitRead(r[0], DO_UL)) ? 100 : i + 1;
- 43c:	89 81       	ldd	r24, Y+1	; 0x01
- 43e:	84 fd       	sbrc	r24, 4
- 440:	02 c0       	rjmp	.+4      	; 0x446 <__FUSE_REGION_LENGTH__+0x46>
- 442:	11 50       	subi	r17, 0x01	; 1
-    while(i < 50) {
- 444:	39 f7       	brne	.-50     	; 0x414 <__FUSE_REGION_LENGTH__+0x14>
-    };
-
-    PLL_SetMode(PLL_UNMUTE);   // Mute off / normal tuner mode
- 446:	84 e0       	ldi	r24, 0x04	; 4
- 448:	0e 94 7e 01 	call	0x2fc	; 0x2fc <PLL_SetMode>
- 44c:	80 e0       	ldi	r24, 0x00	; 0
-
-    return 0;
-}
- 44e:	0f 90       	pop	r0
- 450:	0f 90       	pop	r0
- 452:	0f 90       	pop	r0
- 454:	df 91       	pop	r29
- 456:	cf 91       	pop	r28
- 458:	1f 91       	pop	r17
- 45a:	0f 91       	pop	r16
- 45c:	08 95       	ret
-        fpd = (frequency + 45) << 4;
- 45e:	8c 01       	movw	r16, r24
- 460:	03 5d       	subi	r16, 0xD3	; 211
- 462:	1f 4f       	sbci	r17, 0xFF	; 255
- 464:	84 e0       	ldi	r24, 0x04	; 4
- 466:	00 0f       	add	r16, r16
- 468:	11 1f       	adc	r17, r17
- 46a:	8a 95       	dec	r24
- 46c:	e1 f7       	brne	.-8      	; 0x466 <__FUSE_REGION_LENGTH__+0x66>
-        break;
- 46e:	b4 cf       	rjmp	.-152    	; 0x3d8 <PLL_Tune+0x28>
-
-00000470 <LC72131_init>:
+000002e2 <LC72131_init>:
  *                 init()                 *
  *  Set pin functions and initial states  *
 \******************************************/
 void LC72131_init() {
 
     CE_DDR |=  (1<<CE);   // CE pin as Output.
- 470:	38 9a       	sbi	0x07, 0	; 7
+ 2e2:	38 9a       	sbi	0x07, 0	; 7
 
     DI_DDR &=  ~(1<<DI);  // DI pin as Input.
- 472:	39 98       	cbi	0x07, 1	; 7
+ 2e4:	39 98       	cbi	0x07, 1	; 7
     DI_PORT |= (1<<DI);   // DI pin pull-up resistor enabled.
- 474:	41 9a       	sbi	0x08, 1	; 8
+ 2e6:	41 9a       	sbi	0x08, 1	; 8
 
     CL_DDR |=  (1<<CL);   // CL pin as Output.
- 476:	3a 9a       	sbi	0x07, 2	; 7
+ 2e8:	3a 9a       	sbi	0x07, 2	; 7
 
     DO_DDR |=  (1<<DO);   // DO pin as Output.
- 478:	3b 9a       	sbi	0x07, 3	; 7
+ 2ea:	3b 9a       	sbi	0x07, 3	; 7
 
 	DO_PORT &= ~(1<<DO);  // DO pin low.
- 47a:	43 98       	cbi	0x08, 3	; 8
+ 2ec:	43 98       	cbi	0x08, 3	; 8
 	CL_PORT &= ~(1<<CL);  // Clock pin low.
- 47c:	42 98       	cbi	0x08, 2	; 8
+ 2ee:	42 98       	cbi	0x08, 2	; 8
 
 	// Toggling CE one to "flush" the bus.
 	CE_PORT |= (1<<CE);
- 47e:	40 9a       	sbi	0x08, 0	; 8
+ 2f0:	40 9a       	sbi	0x08, 0	; 8
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
- 480:	8f e8       	ldi	r24, 0x8F	; 143
- 482:	91 e0       	ldi	r25, 0x01	; 1
- 484:	01 97       	sbiw	r24, 0x01	; 1
- 486:	f1 f7       	brne	.-4      	; 0x484 <LC72131_init+0x14>
- 488:	00 c0       	rjmp	.+0      	; 0x48a <LC72131_init+0x1a>
- 48a:	00 00       	nop
+ 2f2:	8f e8       	ldi	r24, 0x8F	; 143
+ 2f4:	91 e0       	ldi	r25, 0x01	; 1
+ 2f6:	01 97       	sbiw	r24, 0x01	; 1
+ 2f8:	f1 f7       	brne	.-4      	; 0x2f6 <LC72131_init+0x14>
+ 2fa:	00 c0       	rjmp	.+0      	; 0x2fc <LC72131_init+0x1a>
+ 2fc:	00 00       	nop
 	_delay_us(CCB_DELAY);
 	CE_PORT &= ~(1<<CE);
- 48c:	40 98       	cbi	0x08, 0	; 8
- 48e:	8f e8       	ldi	r24, 0x8F	; 143
- 490:	91 e0       	ldi	r25, 0x01	; 1
- 492:	01 97       	sbiw	r24, 0x01	; 1
- 494:	f1 f7       	brne	.-4      	; 0x492 <LC72131_init+0x22>
- 496:	00 c0       	rjmp	.+0      	; 0x498 <LC72131_init+0x28>
- 498:	00 00       	nop
+ 2fe:	40 98       	cbi	0x08, 0	; 8
+ 300:	8f e8       	ldi	r24, 0x8F	; 143
+ 302:	91 e0       	ldi	r25, 0x01	; 1
+ 304:	01 97       	sbiw	r24, 0x01	; 1
+ 306:	f1 f7       	brne	.-4      	; 0x304 <LC72131_init+0x22>
+ 308:	00 c0       	rjmp	.+0      	; 0x30a <LC72131_init+0x28>
+ 30a:	00 00       	nop
 	_delay_us(CCB_DELAY);
 }
- 49a:	08 95       	ret
+ 30c:	08 95       	ret
 
-0000049c <writeByte>:
+0000030e <writeByte>:
 
 /************************************\
  *           writeByte()            *
  *  Send a single byte via CCB bus  *
 \************************************/
 void writeByte(uint8_t data) {
- 49c:	0f 93       	push	r16
- 49e:	1f 93       	push	r17
- 4a0:	cf 93       	push	r28
- 4a2:	df 93       	push	r29
- 4a4:	d0 e0       	ldi	r29, 0x00	; 0
- 4a6:	c0 e0       	ldi	r28, 0x00	; 0
+ 30e:	0f 93       	push	r16
+ 310:	1f 93       	push	r17
+ 312:	cf 93       	push	r28
+ 314:	df 93       	push	r29
+ 316:	d0 e0       	ldi	r29, 0x00	; 0
+ 318:	c0 e0       	ldi	r28, 0x00	; 0
 	// Send one byte out bia CCB bus (LSB first)
 	for(int8_t i = 0; i <= 7; i++) {
 		digitalWrite(DO, &DO_PORT, bitRead(data, i));
- 4a8:	08 2f       	mov	r16, r24
- 4aa:	10 e0       	ldi	r17, 0x00	; 0
- 4ac:	a8 01       	movw	r20, r16
- 4ae:	0c 2e       	mov	r0, r28
- 4b0:	02 c0       	rjmp	.+4      	; 0x4b6 <writeByte+0x1a>
- 4b2:	55 95       	asr	r21
- 4b4:	47 95       	ror	r20
- 4b6:	0a 94       	dec	r0
- 4b8:	e2 f7       	brpl	.-8      	; 0x4b2 <writeByte+0x16>
- 4ba:	41 70       	andi	r20, 0x01	; 1
- 4bc:	68 e2       	ldi	r22, 0x28	; 40
- 4be:	70 e0       	ldi	r23, 0x00	; 0
- 4c0:	83 e0       	ldi	r24, 0x03	; 3
- 4c2:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 31a:	08 2f       	mov	r16, r24
+ 31c:	10 e0       	ldi	r17, 0x00	; 0
+ 31e:	a8 01       	movw	r20, r16
+ 320:	0c 2e       	mov	r0, r28
+ 322:	02 c0       	rjmp	.+4      	; 0x328 <writeByte+0x1a>
+ 324:	55 95       	asr	r21
+ 326:	47 95       	ror	r20
+ 328:	0a 94       	dec	r0
+ 32a:	e2 f7       	brpl	.-8      	; 0x324 <writeByte+0x16>
+ 32c:	41 70       	andi	r20, 0x01	; 1
+ 32e:	68 e2       	ldi	r22, 0x28	; 40
+ 330:	70 e0       	ldi	r23, 0x00	; 0
+ 332:	83 e0       	ldi	r24, 0x03	; 3
+ 334:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
 		digitalWrite(CL, &CL_PORT, 1); _delay_us(CCB_DELAY);
- 4c6:	41 e0       	ldi	r20, 0x01	; 1
- 4c8:	68 e2       	ldi	r22, 0x28	; 40
- 4ca:	70 e0       	ldi	r23, 0x00	; 0
- 4cc:	82 e0       	ldi	r24, 0x02	; 2
- 4ce:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
- 4d2:	8f e8       	ldi	r24, 0x8F	; 143
- 4d4:	91 e0       	ldi	r25, 0x01	; 1
- 4d6:	01 97       	sbiw	r24, 0x01	; 1
- 4d8:	f1 f7       	brne	.-4      	; 0x4d6 <writeByte+0x3a>
- 4da:	00 c0       	rjmp	.+0      	; 0x4dc <writeByte+0x40>
- 4dc:	00 00       	nop
+ 338:	41 e0       	ldi	r20, 0x01	; 1
+ 33a:	68 e2       	ldi	r22, 0x28	; 40
+ 33c:	70 e0       	ldi	r23, 0x00	; 0
+ 33e:	82 e0       	ldi	r24, 0x02	; 2
+ 340:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 344:	8f e8       	ldi	r24, 0x8F	; 143
+ 346:	91 e0       	ldi	r25, 0x01	; 1
+ 348:	01 97       	sbiw	r24, 0x01	; 1
+ 34a:	f1 f7       	brne	.-4      	; 0x348 <writeByte+0x3a>
+ 34c:	00 c0       	rjmp	.+0      	; 0x34e <writeByte+0x40>
+ 34e:	00 00       	nop
 		digitalWrite(CL, &CL_PORT, 0); _delay_us(CCB_DELAY);
- 4de:	40 e0       	ldi	r20, 0x00	; 0
- 4e0:	68 e2       	ldi	r22, 0x28	; 40
- 4e2:	70 e0       	ldi	r23, 0x00	; 0
- 4e4:	82 e0       	ldi	r24, 0x02	; 2
- 4e6:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
- 4ea:	8f e8       	ldi	r24, 0x8F	; 143
- 4ec:	91 e0       	ldi	r25, 0x01	; 1
- 4ee:	01 97       	sbiw	r24, 0x01	; 1
- 4f0:	f1 f7       	brne	.-4      	; 0x4ee <writeByte+0x52>
- 4f2:	00 c0       	rjmp	.+0      	; 0x4f4 <writeByte+0x58>
- 4f4:	00 00       	nop
- 4f6:	21 96       	adiw	r28, 0x01	; 1
+ 350:	40 e0       	ldi	r20, 0x00	; 0
+ 352:	68 e2       	ldi	r22, 0x28	; 40
+ 354:	70 e0       	ldi	r23, 0x00	; 0
+ 356:	82 e0       	ldi	r24, 0x02	; 2
+ 358:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 35c:	8f e8       	ldi	r24, 0x8F	; 143
+ 35e:	91 e0       	ldi	r25, 0x01	; 1
+ 360:	01 97       	sbiw	r24, 0x01	; 1
+ 362:	f1 f7       	brne	.-4      	; 0x360 <writeByte+0x52>
+ 364:	00 c0       	rjmp	.+0      	; 0x366 <writeByte+0x58>
+ 366:	00 00       	nop
+ 368:	21 96       	adiw	r28, 0x01	; 1
 	for(int8_t i = 0; i <= 7; i++) {
- 4f8:	c8 30       	cpi	r28, 0x08	; 8
- 4fa:	d1 05       	cpc	r29, r1
- 4fc:	b9 f6       	brne	.-82     	; 0x4ac <writeByte+0x10>
+ 36a:	c8 30       	cpi	r28, 0x08	; 8
+ 36c:	d1 05       	cpc	r29, r1
+ 36e:	b9 f6       	brne	.-82     	; 0x31e <writeByte+0x10>
 	}
 }
- 4fe:	df 91       	pop	r29
- 500:	cf 91       	pop	r28
- 502:	1f 91       	pop	r17
- 504:	0f 91       	pop	r16
- 506:	08 95       	ret
+ 370:	df 91       	pop	r29
+ 372:	cf 91       	pop	r28
+ 374:	1f 91       	pop	r17
+ 376:	0f 91       	pop	r16
+ 378:	08 95       	ret
 
-00000508 <readByte>:
+0000037a <readByte>:
 
 /***************************************\
  *             readByte()              *
  *  Receive a single byte via CCB bus  *
 \***************************************/
 uint8_t readByte() {
- 508:	cf 92       	push	r12
- 50a:	df 92       	push	r13
- 50c:	ef 92       	push	r14
- 50e:	ff 92       	push	r15
- 510:	0f 93       	push	r16
- 512:	1f 93       	push	r17
- 514:	cf 93       	push	r28
- 516:	07 e0       	ldi	r16, 0x07	; 7
- 518:	10 e0       	ldi	r17, 0x00	; 0
+ 37a:	cf 92       	push	r12
+ 37c:	df 92       	push	r13
+ 37e:	ef 92       	push	r14
+ 380:	ff 92       	push	r15
+ 382:	0f 93       	push	r16
+ 384:	1f 93       	push	r17
+ 386:	cf 93       	push	r28
+ 388:	07 e0       	ldi	r16, 0x07	; 7
+ 38a:	10 e0       	ldi	r17, 0x00	; 0
 	uint8_t data = 0;
- 51a:	c0 e0       	ldi	r28, 0x00	; 0
- 51c:	c1 2c       	mov	r12, r1
- 51e:	d1 2c       	mov	r13, r1
- 520:	76 01       	movw	r14, r12
- 522:	c3 94       	inc	r12
+ 38c:	c0 e0       	ldi	r28, 0x00	; 0
+ 38e:	c1 2c       	mov	r12, r1
+ 390:	d1 2c       	mov	r13, r1
+ 392:	76 01       	movw	r14, r12
+ 394:	c3 94       	inc	r12
 	// Receive one byte from the CCB bus (MSB first)
 	for(int8_t i = 7; i >= 0; i--) {
 		digitalWrite(CL, &CL_PORT, 1); _delay_us(CCB_DELAY);
- 524:	41 e0       	ldi	r20, 0x01	; 1
- 526:	68 e2       	ldi	r22, 0x28	; 40
- 528:	70 e0       	ldi	r23, 0x00	; 0
- 52a:	82 e0       	ldi	r24, 0x02	; 2
- 52c:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
- 530:	8f e8       	ldi	r24, 0x8F	; 143
- 532:	91 e0       	ldi	r25, 0x01	; 1
- 534:	01 97       	sbiw	r24, 0x01	; 1
- 536:	f1 f7       	brne	.-4      	; 0x534 <readByte+0x2c>
- 538:	00 c0       	rjmp	.+0      	; 0x53a <readByte+0x32>
- 53a:	00 00       	nop
+ 396:	41 e0       	ldi	r20, 0x01	; 1
+ 398:	68 e2       	ldi	r22, 0x28	; 40
+ 39a:	70 e0       	ldi	r23, 0x00	; 0
+ 39c:	82 e0       	ldi	r24, 0x02	; 2
+ 39e:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 3a2:	8f e8       	ldi	r24, 0x8F	; 143
+ 3a4:	91 e0       	ldi	r25, 0x01	; 1
+ 3a6:	01 97       	sbiw	r24, 0x01	; 1
+ 3a8:	f1 f7       	brne	.-4      	; 0x3a6 <readByte+0x2c>
+ 3aa:	00 c0       	rjmp	.+0      	; 0x3ac <readByte+0x32>
+ 3ac:	00 00       	nop
 		bitWrite(data, i, digitalRead(DI, &DI_PIN));
- 53c:	66 e2       	ldi	r22, 0x26	; 38
- 53e:	70 e0       	ldi	r23, 0x00	; 0
- 540:	81 e0       	ldi	r24, 0x01	; 1
- 542:	0e 94 66 00 	call	0xcc	; 0xcc <digitalRead>
- 546:	b7 01       	movw	r22, r14
- 548:	a6 01       	movw	r20, r12
- 54a:	00 2e       	mov	r0, r16
- 54c:	04 c0       	rjmp	.+8      	; 0x556 <readByte+0x4e>
- 54e:	44 0f       	add	r20, r20
- 550:	55 1f       	adc	r21, r21
- 552:	66 1f       	adc	r22, r22
- 554:	77 1f       	adc	r23, r23
- 556:	0a 94       	dec	r0
- 558:	d2 f7       	brpl	.-12     	; 0x54e <readByte+0x46>
- 55a:	88 23       	and	r24, r24
- 55c:	c9 f0       	breq	.+50     	; 0x590 <readByte+0x88>
- 55e:	c4 2b       	or	r28, r20
+ 3ae:	66 e2       	ldi	r22, 0x26	; 38
+ 3b0:	70 e0       	ldi	r23, 0x00	; 0
+ 3b2:	81 e0       	ldi	r24, 0x01	; 1
+ 3b4:	0e 94 66 00 	call	0xcc	; 0xcc <digitalRead>
+ 3b8:	b7 01       	movw	r22, r14
+ 3ba:	a6 01       	movw	r20, r12
+ 3bc:	00 2e       	mov	r0, r16
+ 3be:	04 c0       	rjmp	.+8      	; 0x3c8 <readByte+0x4e>
+ 3c0:	44 0f       	add	r20, r20
+ 3c2:	55 1f       	adc	r21, r21
+ 3c4:	66 1f       	adc	r22, r22
+ 3c6:	77 1f       	adc	r23, r23
+ 3c8:	0a 94       	dec	r0
+ 3ca:	d2 f7       	brpl	.-12     	; 0x3c0 <readByte+0x46>
+ 3cc:	88 23       	and	r24, r24
+ 3ce:	c9 f0       	breq	.+50     	; 0x402 <__FUSE_REGION_LENGTH__+0x2>
+ 3d0:	c4 2b       	or	r28, r20
 		digitalWrite(CL, &CL_PORT, 0); _delay_us(CCB_DELAY);
- 560:	40 e0       	ldi	r20, 0x00	; 0
- 562:	68 e2       	ldi	r22, 0x28	; 40
- 564:	70 e0       	ldi	r23, 0x00	; 0
- 566:	82 e0       	ldi	r24, 0x02	; 2
- 568:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
- 56c:	8f e8       	ldi	r24, 0x8F	; 143
- 56e:	91 e0       	ldi	r25, 0x01	; 1
- 570:	01 97       	sbiw	r24, 0x01	; 1
- 572:	f1 f7       	brne	.-4      	; 0x570 <readByte+0x68>
- 574:	00 c0       	rjmp	.+0      	; 0x576 <readByte+0x6e>
- 576:	00 00       	nop
- 578:	01 50       	subi	r16, 0x01	; 1
- 57a:	11 09       	sbc	r17, r1
- 57c:	98 f6       	brcc	.-90     	; 0x524 <readByte+0x1c>
+ 3d2:	40 e0       	ldi	r20, 0x00	; 0
+ 3d4:	68 e2       	ldi	r22, 0x28	; 40
+ 3d6:	70 e0       	ldi	r23, 0x00	; 0
+ 3d8:	82 e0       	ldi	r24, 0x02	; 2
+ 3da:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 3de:	8f e8       	ldi	r24, 0x8F	; 143
+ 3e0:	91 e0       	ldi	r25, 0x01	; 1
+ 3e2:	01 97       	sbiw	r24, 0x01	; 1
+ 3e4:	f1 f7       	brne	.-4      	; 0x3e2 <readByte+0x68>
+ 3e6:	00 c0       	rjmp	.+0      	; 0x3e8 <readByte+0x6e>
+ 3e8:	00 00       	nop
+ 3ea:	01 50       	subi	r16, 0x01	; 1
+ 3ec:	11 09       	sbc	r17, r1
+ 3ee:	98 f6       	brcc	.-90     	; 0x396 <readByte+0x1c>
 	}
 	return data;
 }
- 57e:	8c 2f       	mov	r24, r28
- 580:	cf 91       	pop	r28
- 582:	1f 91       	pop	r17
- 584:	0f 91       	pop	r16
- 586:	ff 90       	pop	r15
- 588:	ef 90       	pop	r14
- 58a:	df 90       	pop	r13
- 58c:	cf 90       	pop	r12
- 58e:	08 95       	ret
+ 3f0:	8c 2f       	mov	r24, r28
+ 3f2:	cf 91       	pop	r28
+ 3f4:	1f 91       	pop	r17
+ 3f6:	0f 91       	pop	r16
+ 3f8:	ff 90       	pop	r15
+ 3fa:	ef 90       	pop	r14
+ 3fc:	df 90       	pop	r13
+ 3fe:	cf 90       	pop	r12
+ 400:	08 95       	ret
 		bitWrite(data, i, digitalRead(DI, &DI_PIN));
- 590:	40 95       	com	r20
- 592:	c4 23       	and	r28, r20
- 594:	e5 cf       	rjmp	.-54     	; 0x560 <readByte+0x58>
+ 402:	40 95       	com	r20
+ 404:	c4 23       	and	r28, r20
+ 406:	e5 cf       	rjmp	.-54     	; 0x3d2 <readByte+0x58>
 
-00000596 <ccb>:
+00000408 <ccb>:
 
 /*****************************************\
  *                 ccb()                 *
  *  The universal send/receive function  *
 \*****************************************/
 void ccb(uint8_t address, uint8_t *data, int8_t dataLength, uint8_t mode) {
- 596:	ef 92       	push	r14
- 598:	ff 92       	push	r15
- 59a:	0f 93       	push	r16
- 59c:	1f 93       	push	r17
- 59e:	cf 93       	push	r28
- 5a0:	df 93       	push	r29
- 5a2:	7b 01       	movw	r14, r22
- 5a4:	c4 2f       	mov	r28, r20
- 5a6:	d2 2f       	mov	r29, r18
+ 408:	ef 92       	push	r14
+ 40a:	ff 92       	push	r15
+ 40c:	0f 93       	push	r16
+ 40e:	1f 93       	push	r17
+ 410:	cf 93       	push	r28
+ 412:	df 93       	push	r29
+ 414:	7b 01       	movw	r14, r22
+ 416:	c4 2f       	mov	r28, r20
+ 418:	d2 2f       	mov	r29, r18
 	int8_t i; // i may reach negative values in the counters
 	          // dataLength is typed "int8_t" for compatibility with this counter
 
 	// Send the address, with the nibbles swapped (required by the CCB protocol to support 4-bit addresses)
 	writeByte((address >> 4) | (address << 4));
- 5a8:	82 95       	swap	r24
- 5aa:	0e 94 4e 02 	call	0x49c	; 0x49c <writeByte>
+ 41a:	82 95       	swap	r24
+ 41c:	0e 94 87 01 	call	0x30e	; 0x30e <writeByte>
 
 	// Enter the data transfer mode
 	digitalWrite(CL, &CL_PORT, 0);
- 5ae:	40 e0       	ldi	r20, 0x00	; 0
- 5b0:	68 e2       	ldi	r22, 0x28	; 40
- 5b2:	70 e0       	ldi	r23, 0x00	; 0
- 5b4:	82 e0       	ldi	r24, 0x02	; 2
- 5b6:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 420:	40 e0       	ldi	r20, 0x00	; 0
+ 422:	68 e2       	ldi	r22, 0x28	; 40
+ 424:	70 e0       	ldi	r23, 0x00	; 0
+ 426:	82 e0       	ldi	r24, 0x02	; 2
+ 428:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
 	digitalWrite(CE, &CL_PORT, 1);
- 5ba:	41 e0       	ldi	r20, 0x01	; 1
- 5bc:	68 e2       	ldi	r22, 0x28	; 40
- 5be:	70 e0       	ldi	r23, 0x00	; 0
- 5c0:	80 e0       	ldi	r24, 0x00	; 0
- 5c2:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
- 5c6:	8f e8       	ldi	r24, 0x8F	; 143
- 5c8:	91 e0       	ldi	r25, 0x01	; 1
- 5ca:	01 97       	sbiw	r24, 0x01	; 1
- 5cc:	f1 f7       	brne	.-4      	; 0x5ca <ccb+0x34>
- 5ce:	00 c0       	rjmp	.+0      	; 0x5d0 <ccb+0x3a>
- 5d0:	00 00       	nop
+ 42c:	41 e0       	ldi	r20, 0x01	; 1
+ 42e:	68 e2       	ldi	r22, 0x28	; 40
+ 430:	70 e0       	ldi	r23, 0x00	; 0
+ 432:	80 e0       	ldi	r24, 0x00	; 0
+ 434:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 438:	8f e8       	ldi	r24, 0x8F	; 143
+ 43a:	91 e0       	ldi	r25, 0x01	; 1
+ 43c:	01 97       	sbiw	r24, 0x01	; 1
+ 43e:	f1 f7       	brne	.-4      	; 0x43c <ccb+0x34>
+ 440:	00 c0       	rjmp	.+0      	; 0x442 <ccb+0x3a>
+ 442:	00 00       	nop
 	_delay_us(CCB_DELAY);
 
 	switch(mode) {
- 5d2:	dd 23       	and	r29, r29
- 5d4:	71 f0       	breq	.+28     	; 0x5f2 <ccb+0x5c>
- 5d6:	d1 30       	cpi	r29, 0x01	; 1
- 5d8:	c1 f4       	brne	.+48     	; 0x60a <ccb+0x74>
- 5da:	de 2d       	mov	r29, r14
- 5dc:	87 01       	movw	r16, r14
+ 444:	dd 23       	and	r29, r29
+ 446:	71 f0       	breq	.+28     	; 0x464 <ccb+0x5c>
+ 448:	d1 30       	cpi	r29, 0x01	; 1
+ 44a:	c1 f4       	brne	.+48     	; 0x47c <ccb+0x74>
+ 44c:	de 2d       	mov	r29, r14
+ 44e:	87 01       	movw	r16, r14
 		digitalWrite(DO, &DO_PORT, 0);
 		break;
 
 	case _CCB_RECEIVE:
 		// Receive data
 		for(i = 0; i < dataLength; i++)
- 5de:	80 2f       	mov	r24, r16
- 5e0:	8d 1b       	sub	r24, r29
- 5e2:	8c 17       	cp	r24, r28
- 5e4:	94 f4       	brge	.+36     	; 0x60a <ccb+0x74>
+ 450:	80 2f       	mov	r24, r16
+ 452:	8d 1b       	sub	r24, r29
+ 454:	8c 17       	cp	r24, r28
+ 456:	94 f4       	brge	.+36     	; 0x47c <ccb+0x74>
 			data[i] = readByte();
- 5e6:	0e 94 84 02 	call	0x508	; 0x508 <readByte>
- 5ea:	f8 01       	movw	r30, r16
- 5ec:	81 93       	st	Z+, r24
- 5ee:	8f 01       	movw	r16, r30
- 5f0:	f6 cf       	rjmp	.-20     	; 0x5de <ccb+0x48>
+ 458:	0e 94 bd 01 	call	0x37a	; 0x37a <readByte>
+ 45c:	f8 01       	movw	r30, r16
+ 45e:	81 93       	st	Z+, r24
+ 460:	8f 01       	movw	r16, r30
+ 462:	f6 cf       	rjmp	.-20     	; 0x450 <ccb+0x48>
 		for(i = dataLength - 1; i >= 0; i--)
- 5f2:	c1 50       	subi	r28, 0x01	; 1
- 5f4:	0c 2e       	mov	r0, r28
- 5f6:	00 0c       	add	r0, r0
- 5f8:	dd 0b       	sbc	r29, r29
- 5fa:	c7 ff       	sbrs	r28, 7
- 5fc:	19 c0       	rjmp	.+50     	; 0x630 <ccb+0x9a>
+ 464:	c1 50       	subi	r28, 0x01	; 1
+ 466:	0c 2e       	mov	r0, r28
+ 468:	00 0c       	add	r0, r0
+ 46a:	dd 0b       	sbc	r29, r29
+ 46c:	c7 ff       	sbrs	r28, 7
+ 46e:	19 c0       	rjmp	.+50     	; 0x4a2 <ccb+0x9a>
 		digitalWrite(DO, &DO_PORT, 0);
- 5fe:	40 e0       	ldi	r20, 0x00	; 0
- 600:	68 e2       	ldi	r22, 0x28	; 40
- 602:	70 e0       	ldi	r23, 0x00	; 0
- 604:	83 e0       	ldi	r24, 0x03	; 3
- 606:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 470:	40 e0       	ldi	r20, 0x00	; 0
+ 472:	68 e2       	ldi	r22, 0x28	; 40
+ 474:	70 e0       	ldi	r23, 0x00	; 0
+ 476:	83 e0       	ldi	r24, 0x03	; 3
+ 478:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
 		break;
 	}
 
 	digitalWrite(CE, &CE_PORT, 0);
- 60a:	40 e0       	ldi	r20, 0x00	; 0
- 60c:	68 e2       	ldi	r22, 0x28	; 40
- 60e:	70 e0       	ldi	r23, 0x00	; 0
- 610:	80 e0       	ldi	r24, 0x00	; 0
- 612:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
- 616:	8f e8       	ldi	r24, 0x8F	; 143
- 618:	91 e0       	ldi	r25, 0x01	; 1
- 61a:	01 97       	sbiw	r24, 0x01	; 1
- 61c:	f1 f7       	brne	.-4      	; 0x61a <ccb+0x84>
- 61e:	00 c0       	rjmp	.+0      	; 0x620 <ccb+0x8a>
- 620:	00 00       	nop
+ 47c:	40 e0       	ldi	r20, 0x00	; 0
+ 47e:	68 e2       	ldi	r22, 0x28	; 40
+ 480:	70 e0       	ldi	r23, 0x00	; 0
+ 482:	80 e0       	ldi	r24, 0x00	; 0
+ 484:	0e 94 53 00 	call	0xa6	; 0xa6 <digitalWrite>
+ 488:	8f e8       	ldi	r24, 0x8F	; 143
+ 48a:	91 e0       	ldi	r25, 0x01	; 1
+ 48c:	01 97       	sbiw	r24, 0x01	; 1
+ 48e:	f1 f7       	brne	.-4      	; 0x48c <ccb+0x84>
+ 490:	00 c0       	rjmp	.+0      	; 0x492 <ccb+0x8a>
+ 492:	00 00       	nop
 	_delay_us(CCB_DELAY);
 }
- 622:	df 91       	pop	r29
- 624:	cf 91       	pop	r28
- 626:	1f 91       	pop	r17
- 628:	0f 91       	pop	r16
- 62a:	ff 90       	pop	r15
- 62c:	ef 90       	pop	r14
- 62e:	08 95       	ret
+ 494:	df 91       	pop	r29
+ 496:	cf 91       	pop	r28
+ 498:	1f 91       	pop	r17
+ 49a:	0f 91       	pop	r16
+ 49c:	ff 90       	pop	r15
+ 49e:	ef 90       	pop	r14
+ 4a0:	08 95       	ret
 				writeByte(data[i]);
- 630:	f7 01       	movw	r30, r14
- 632:	ec 0f       	add	r30, r28
- 634:	fd 1f       	adc	r31, r29
- 636:	80 81       	ld	r24, Z
- 638:	0e 94 4e 02 	call	0x49c	; 0x49c <writeByte>
- 63c:	21 97       	sbiw	r28, 0x01	; 1
- 63e:	dd cf       	rjmp	.-70     	; 0x5fa <ccb+0x64>
+ 4a2:	f7 01       	movw	r30, r14
+ 4a4:	ec 0f       	add	r30, r28
+ 4a6:	fd 1f       	adc	r31, r29
+ 4a8:	80 81       	ld	r24, Z
+ 4aa:	0e 94 87 01 	call	0x30e	; 0x30e <writeByte>
+ 4ae:	21 97       	sbiw	r28, 0x01	; 1
+ 4b0:	dd cf       	rjmp	.-70     	; 0x46c <ccb+0x64>
 
-00000640 <diPinState>:
+000004b2 <diPinState>:
  * Some CCB devices uses the DO pin for other functions  *
  * when the data bus is idle.  This method makes reading *
  * it easier                                             *
 \*********************************************************/
 uint8_t diPinState() {
 	return digitalRead(DI, &DI_PIN);
- 640:	66 e2       	ldi	r22, 0x26	; 38
- 642:	70 e0       	ldi	r23, 0x00	; 0
- 644:	81 e0       	ldi	r24, 0x01	; 1
- 646:	0c 94 66 00 	jmp	0xcc	; 0xcc <digitalRead>
+ 4b2:	66 e2       	ldi	r22, 0x26	; 38
+ 4b4:	70 e0       	ldi	r23, 0x00	; 0
+ 4b6:	81 e0       	ldi	r24, 0x01	; 1
+ 4b8:	0c 94 66 00 	jmp	0xcc	; 0xcc <digitalRead>
 
-0000064a <LC72131_write>:
+000004bc <LC72131_write>:
  * backwards (from the rightmost to the leftmost byte), *
  * so the order of the data bytes must be the opposite  *
  * as the one shown on the device's datasheets          *
 \********************************************************/
 void LC72131_write(uint8_t address, uint8_t *data, int8_t dataLength) {
 	ccb(address, data, dataLength, _CCB_SEND);
- 64a:	20 e0       	ldi	r18, 0x00	; 0
- 64c:	0c 94 cb 02 	jmp	0x596	; 0x596 <ccb>
+ 4bc:	20 e0       	ldi	r18, 0x00	; 0
+ 4be:	0c 94 04 02 	jmp	0x408	; 0x408 <ccb>
 
-00000650 <LC72131_read>:
- 650:	21 e0       	ldi	r18, 0x01	; 1
- 652:	0c 94 cb 02 	jmp	0x596	; 0x596 <ccb>
+000004c2 <LC72131_read>:
+/******************************************************\
+ *                      read()                        *
+ *  receive dataLength (up to 127) bytes via CCB bus  *
+\******************************************************/
+void LC72131_read(uint8_t address, uint8_t *data, int8_t dataLength) {
+	ccb(address, data, dataLength, _CCB_RECEIVE);
+ 4c2:	21 e0       	ldi	r18, 0x01	; 1
+ 4c4:	0c 94 04 02 	jmp	0x408	; 0x408 <ccb>
 
-00000656 <main>:
+000004c8 <PLL_Init>:
+ * Initialize the PLL settings vectors with     *
+ * parameters common to booth AM and FM modes   *
+\************************************************/
+void PLL_Init() {
+
+    pll_in1[0]=0;   // Zeroing byte 0 of pll_in1.
+ 4c8:	ea e1       	ldi	r30, 0x1A	; 26
+ 4ca:	f1 e0       	ldi	r31, 0x01	; 1
+ 4cc:	10 82       	st	Z, r1
+    pll_in1[1]=0;   // Zeroing byte 1 of pll_in1.
+ 4ce:	11 82       	std	Z+1, r1	; 0x01
+    pll_in1[2]=0;   // Zeroing byte 2 of pll_in1.
+ 4d0:	12 82       	std	Z+2, r1	; 0x02
+
+    pll_in2[0]=0;   // Zeroing byte 0 of pll_in2.
+    pll_in2[1]=0;   // Zeroing byte 1 of pll_in2.
+    pll_in2[2]=0;   // Zeroing byte 2 of pll_in2.
+
+    bitSet(pll_in2[0], IN2_IFS);   // IF counter in normal mode. Page 12 and 15 of the Datasheet.
+ 4d2:	e7 e1       	ldi	r30, 0x17	; 23
+ 4d4:	f1 e0       	ldi	r31, 0x01	; 1
+ 4d6:	80 e1       	ldi	r24, 0x10	; 16
+ 4d8:	80 83       	st	Z, r24
+    bitSet(pll_in2[1], IN2_UL0);   // Phase error detection width = 0us. UL1=0, UL0=1. Page 11 of the Datasheet.
+ 4da:	81 83       	std	Z+1, r24	; 0x01
+    bitSet(pll_in2[2], IN2_BO1);   // Mute off / normal tuner mode
+ 4dc:	82 83       	std	Z+2, r24	; 0x02
+}
+ 4de:	08 95       	ret
+
+000004e0 <PLL_SetMode>:
+
+void PLL_SetMode(uint8_t mode) {
+
+  switch(mode) {
+ 4e0:	83 30       	cpi	r24, 0x03	; 3
+ 4e2:	c1 f1       	breq	.+112    	; 0x554 <PLL_SetMode+0x74>
+ 4e4:	80 f4       	brcc	.+32     	; 0x506 <PLL_SetMode+0x26>
+ 4e6:	81 30       	cpi	r24, 0x01	; 1
+ 4e8:	89 f1       	breq	.+98     	; 0x54c <PLL_SetMode+0x6c>
+ 4ea:	82 30       	cpi	r24, 0x02	; 2
+ 4ec:	49 f1       	breq	.+82     	; 0x540 <PLL_SetMode+0x60>
+      bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone = DZC
+      bitWrite(pll_in2[1], IN2_DZ1, 1); //
+      bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
+      break;
+  }
+  LC72131_write(0x82, pll_in1, 3);
+ 4ee:	43 e0       	ldi	r20, 0x03	; 3
+ 4f0:	6a e1       	ldi	r22, 0x1A	; 26
+ 4f2:	71 e0       	ldi	r23, 0x01	; 1
+ 4f4:	82 e8       	ldi	r24, 0x82	; 130
+ 4f6:	0e 94 5e 02 	call	0x4bc	; 0x4bc <LC72131_write>
+  LC72131_write(0x92, pll_in2, 3);
+ 4fa:	43 e0       	ldi	r20, 0x03	; 3
+ 4fc:	67 e1       	ldi	r22, 0x17	; 23
+ 4fe:	71 e0       	ldi	r23, 0x01	; 1
+ 500:	82 e9       	ldi	r24, 0x92	; 146
+ 502:	0c 94 5e 02 	jmp	0x4bc	; 0x4bc <LC72131_write>
+  switch(mode) {
+ 506:	85 30       	cpi	r24, 0x05	; 5
+ 508:	69 f1       	breq	.+90     	; 0x564 <PLL_SetMode+0x84>
+ 50a:	40 f1       	brcs	.+80     	; 0x55c <PLL_SetMode+0x7c>
+ 50c:	86 30       	cpi	r24, 0x06	; 6
+ 50e:	79 f7       	brne	.-34     	; 0x4ee <PLL_SetMode+0xe>
+      band = PLL_BAND_AM;
+ 510:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <band>
+      bitWrite(pll_in1[0], IN1_DVS, 0); // Programmable Divider divisor = 1
+ 514:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
+ 518:	8d 7e       	andi	r24, 0xED	; 237
+ 51a:	88 68       	ori	r24, 0x88	; 136
+ 51c:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
+      bitWrite(pll_in2[0], IN2_GT1, 0); //
+ 520:	80 91 17 01 	lds	r24, 0x0117	; 0x800117 <pll_in2>
+ 524:	8d 7f       	andi	r24, 0xFD	; 253
+ 526:	81 60       	ori	r24, 0x01	; 1
+ 528:	80 93 17 01 	sts	0x0117, r24	; 0x800117 <pll_in2>
+      bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone = DZC
+ 52c:	80 91 18 01 	lds	r24, 0x0118	; 0x800118 <pll_in2+0x1>
+ 530:	8f 7b       	andi	r24, 0xBF	; 191
+      bitWrite(pll_in2[1], IN2_DZ1, 1); //
+ 532:	80 68       	ori	r24, 0x80	; 128
+ 534:	80 93 18 01 	sts	0x0118, r24	; 0x800118 <pll_in2+0x1>
+      bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
+ 538:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
+ 53c:	8f 7d       	andi	r24, 0xDF	; 223
+ 53e:	03 c0       	rjmp	.+6      	; 0x546 <PLL_SetMode+0x66>
+      bitClear(pll_in2[2], IN2_BO4);
+ 540:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
+ 544:	8f 77       	andi	r24, 0x7F	; 127
+      bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
+ 546:	80 93 19 01 	sts	0x0119, r24	; 0x800119 <pll_in2+0x2>
+      break;
+ 54a:	d1 cf       	rjmp	.-94     	; 0x4ee <PLL_SetMode+0xe>
+      bitSet(pll_in2[2], IN2_BO4);
+ 54c:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
+ 550:	80 68       	ori	r24, 0x80	; 128
+ 552:	f9 cf       	rjmp	.-14     	; 0x546 <PLL_SetMode+0x66>
+      bitClear(pll_in2[2], IN2_BO1);
+ 554:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
+ 558:	8f 7e       	andi	r24, 0xEF	; 239
+ 55a:	f5 cf       	rjmp	.-22     	; 0x546 <PLL_SetMode+0x66>
+      bitSet(pll_in2[2], IN2_BO1);
+ 55c:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
+ 560:	80 61       	ori	r24, 0x10	; 16
+ 562:	f1 cf       	rjmp	.-30     	; 0x546 <PLL_SetMode+0x66>
+      band = PLL_BAND_FM;
+ 564:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <band>
+      bitWrite(pll_in1[0], IN1_DVS, 1); // Programmable Divider divisor = 2
+ 568:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
+ 56c:	8f 77       	andi	r24, 0x7F	; 127
+ 56e:	8a 61       	ori	r24, 0x1A	; 26
+ 570:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
+      bitWrite(pll_in2[0], IN2_GT0, 0); // IF counter measurement period = 32ms
+ 574:	80 91 17 01 	lds	r24, 0x0117	; 0x800117 <pll_in2>
+ 578:	8e 7f       	andi	r24, 0xFE	; 254
+      bitWrite(pll_in2[0], IN2_GT1, 1); //
+ 57a:	82 60       	ori	r24, 0x02	; 2
+ 57c:	80 93 17 01 	sts	0x0117, r24	; 0x800117 <pll_in2>
+      bitWrite(pll_in2[1], IN2_DZ1, 0); //
+ 580:	80 91 18 01 	lds	r24, 0x0118	; 0x800118 <pll_in2+0x1>
+ 584:	8f 77       	andi	r24, 0x7F	; 127
+ 586:	80 64       	ori	r24, 0x40	; 64
+ 588:	80 93 18 01 	sts	0x0118, r24	; 0x800118 <pll_in2+0x1>
+      bitWrite(pll_in2[2], IN2_BO2, 1); // FM mode
+ 58c:	80 91 19 01 	lds	r24, 0x0119	; 0x800119 <pll_in2+0x2>
+ 590:	80 62       	ori	r24, 0x20	; 32
+ 592:	d9 cf       	rjmp	.-78     	; 0x546 <PLL_SetMode+0x66>
+
+00000594 <PLL_Tune>:
+ * representation can be directly sent to the PLL and is    *
+ * easy to represent:                                       *
+ * - FM mode (divisor = 100): frequency (MHz) * 10          *
+ * - AM mode (divisor = 10):  frequency (kHZ) / 10          *
+\************************************************************/
+uint8_t PLL_Tune(uint16_t frequency) {
+ 594:	cf 93       	push	r28
+ 596:	df 93       	push	r29
+
+    uint16_t fpd = 0;
+
+    switch(band) {
+ 598:	20 91 00 01 	lds	r18, 0x0100	; 0x800100 <band>
+ 59c:	25 30       	cpi	r18, 0x05	; 5
+ 59e:	21 f0       	breq	.+8      	; 0x5a8 <PLL_Tune+0x14>
+ 5a0:	26 30       	cpi	r18, 0x06	; 6
+ 5a2:	49 f1       	breq	.+82     	; 0x5f6 <PLL_Tune+0x62>
+        case PLL_BAND_AM:
+        // AM: fpd = ((frequency + FI) / 10) << 4
+        fpd = (frequency + 45) << 4;
+        break;
+
+        default: return 1;
+ 5a4:	81 e0       	ldi	r24, 0x01	; 1
+ 5a6:	24 c0       	rjmp	.+72     	; 0x5f0 <PLL_Tune+0x5c>
+        fpd = (frequency + 107);
+ 5a8:	ec 01       	movw	r28, r24
+ 5aa:	c5 59       	subi	r28, 0x95	; 149
+ 5ac:	df 4f       	sbci	r29, 0xFF	; 255
+    }
+
+    PLL_SetMode(PLL_MUTE);
+ 5ae:	83 e0       	ldi	r24, 0x03	; 3
+ 5b0:	0e 94 70 02 	call	0x4e0	; 0x4e0 <PLL_SetMode>
+
+    // Reset the IF counter and program the Frequency Programmable Divider (fpd)
+    bitClear(pll_in1[0], IN1_CTE);
+ 5b4:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
+ 5b8:	8b 7f       	andi	r24, 0xFB	; 251
+ 5ba:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
+    pll_in1[1] = (uint8_t) (fpd >> 8);
+ 5be:	d0 93 1b 01 	sts	0x011B, r29	; 0x80011b <pll_in1+0x1>
+    pll_in1[2] =  (uint8_t) (fpd & 0x00ff);
+ 5c2:	c0 93 1c 01 	sts	0x011C, r28	; 0x80011c <pll_in1+0x2>
+    LC72131_write(0x82, pll_in1, 3);
+ 5c6:	43 e0       	ldi	r20, 0x03	; 3
+ 5c8:	6a e1       	ldi	r22, 0x1A	; 26
+ 5ca:	71 e0       	ldi	r23, 0x01	; 1
+ 5cc:	82 e8       	ldi	r24, 0x82	; 130
+ 5ce:	0e 94 5e 02 	call	0x4bc	; 0x4bc <LC72131_write>
+
+    // Start the IF counter
+    bitSet(pll_in1[0], IN1_CTE);
+ 5d2:	80 91 1a 01 	lds	r24, 0x011A	; 0x80011a <pll_in1>
+ 5d6:	84 60       	ori	r24, 0x04	; 4
+ 5d8:	80 93 1a 01 	sts	0x011A, r24	; 0x80011a <pll_in1>
+    LC72131_write(0x82, pll_in1, 3);
+ 5dc:	43 e0       	ldi	r20, 0x03	; 3
+ 5de:	6a e1       	ldi	r22, 0x1A	; 26
+ 5e0:	71 e0       	ldi	r23, 0x01	; 1
+ 5e2:	82 e8       	ldi	r24, 0x82	; 130
+ 5e4:	0e 94 5e 02 	call	0x4bc	; 0x4bc <LC72131_write>
+
+    PLL_SetMode(PLL_UNMUTE);
+ 5e8:	84 e0       	ldi	r24, 0x04	; 4
+ 5ea:	0e 94 70 02 	call	0x4e0	; 0x4e0 <PLL_SetMode>
+
+    return 0;
+ 5ee:	80 e0       	ldi	r24, 0x00	; 0
+}
+ 5f0:	df 91       	pop	r29
+ 5f2:	cf 91       	pop	r28
+ 5f4:	08 95       	ret
+        fpd = (frequency + 45) << 4;
+ 5f6:	ec 01       	movw	r28, r24
+ 5f8:	ad 96       	adiw	r28, 0x2d	; 45
+ 5fa:	84 e0       	ldi	r24, 0x04	; 4
+ 5fc:	cc 0f       	add	r28, r28
+ 5fe:	dd 1f       	adc	r29, r29
+ 600:	8a 95       	dec	r24
+ 602:	e1 f7       	brne	.-8      	; 0x5fc <PLL_Tune+0x68>
+        break;
+ 604:	d4 cf       	rjmp	.-88     	; 0x5ae <PLL_Tune+0x1a>
+
+00000606 <main>:
     lcd_init();             // LCD initialization.
- 656:	0e 94 fe 00 	call	0x1fc	; 0x1fc <lcd_init>
+ 606:	0e 94 fe 00 	call	0x1fc	; 0x1fc <lcd_init>
     lcd_clrscr();           // Clear the LCD.
- 65a:	0e 94 db 00 	call	0x1b6	; 0x1b6 <lcd_clrscr>
+ 60a:	0e 94 db 00 	call	0x1b6	; 0x1b6 <lcd_clrscr>
     lcd_home();             // Set the cursor at home position.
- 65e:	0e 94 de 00 	call	0x1bc	; 0x1bc <lcd_home>
+ 60e:	0e 94 de 00 	call	0x1bc	; 0x1bc <lcd_home>
     lcd_puts("This is a test!");
- 662:	85 e0       	ldi	r24, 0x05	; 5
- 664:	91 e0       	ldi	r25, 0x01	; 1
- 666:	0e 94 e4 00 	call	0x1c8	; 0x1c8 <lcd_puts>
-	__builtin_avr_delay_cycles(__ticks_dc);
- 66a:	2f ef       	ldi	r18, 0xFF	; 255
- 66c:	87 ea       	ldi	r24, 0xA7	; 167
- 66e:	91 e6       	ldi	r25, 0x61	; 97
- 670:	21 50       	subi	r18, 0x01	; 1
- 672:	80 40       	sbci	r24, 0x00	; 0
- 674:	90 40       	sbci	r25, 0x00	; 0
- 676:	e1 f7       	brne	.-8      	; 0x670 <main+0x1a>
- 678:	00 c0       	rjmp	.+0      	; 0x67a <main+0x24>
- 67a:	00 00       	nop
-    lcd_clrscr();
- 67c:	0e 94 db 00 	call	0x1b6	; 0x1b6 <lcd_clrscr>
+ 612:	85 e0       	ldi	r24, 0x05	; 5
+ 614:	91 e0       	ldi	r25, 0x01	; 1
+ 616:	0e 94 e4 00 	call	0x1c8	; 0x1c8 <lcd_puts>
     LC72131_init();
- 680:	0e 94 38 02 	call	0x470	; 0x470 <LC72131_init>
+ 61a:	0e 94 71 01 	call	0x2e2	; 0x2e2 <LC72131_init>
     PLL_SetMode(PLL_BAND_FM);
- 684:	85 e0       	ldi	r24, 0x05	; 5
- 686:	0e 94 7e 01 	call	0x2fc	; 0x2fc <PLL_SetMode>
+ 61e:	85 e0       	ldi	r24, 0x05	; 5
+ 620:	0e 94 70 02 	call	0x4e0	; 0x4e0 <PLL_SetMode>
     tuned = PLL_Tune(FMFrequency);
- 68a:	80 91 03 01 	lds	r24, 0x0103	; 0x800103 <FMFrequency>
- 68e:	90 91 04 01 	lds	r25, 0x0104	; 0x800104 <FMFrequency+0x1>
- 692:	0e 94 d8 01 	call	0x3b0	; 0x3b0 <PLL_Tune>
- 696:	80 93 16 01 	sts	0x0116, r24	; 0x800116 <__data_end>
- 69a:	2f ef       	ldi	r18, 0xFF	; 255
- 69c:	83 e2       	ldi	r24, 0x23	; 35
- 69e:	94 ef       	ldi	r25, 0xF4	; 244
- 6a0:	21 50       	subi	r18, 0x01	; 1
- 6a2:	80 40       	sbci	r24, 0x00	; 0
- 6a4:	90 40       	sbci	r25, 0x00	; 0
- 6a6:	e1 f7       	brne	.-8      	; 0x6a0 <main+0x4a>
- 6a8:	00 c0       	rjmp	.+0      	; 0x6aa <main+0x54>
- 6aa:	00 00       	nop
-     PLL_SetMode(PLL_MUTE);
- 6ac:	83 e0       	ldi	r24, 0x03	; 3
- 6ae:	0e 94 7e 01 	call	0x2fc	; 0x2fc <PLL_SetMode>
- 6b2:	2f ef       	ldi	r18, 0xFF	; 255
- 6b4:	83 e2       	ldi	r24, 0x23	; 35
- 6b6:	94 ef       	ldi	r25, 0xF4	; 244
- 6b8:	21 50       	subi	r18, 0x01	; 1
- 6ba:	80 40       	sbci	r24, 0x00	; 0
- 6bc:	90 40       	sbci	r25, 0x00	; 0
- 6be:	e1 f7       	brne	.-8      	; 0x6b8 <main+0x62>
- 6c0:	00 c0       	rjmp	.+0      	; 0x6c2 <main+0x6c>
- 6c2:	00 00       	nop
-     PLL_SetMode(PLL_UNMUTE);
- 6c4:	84 e0       	ldi	r24, 0x04	; 4
- 6c6:	0e 94 7e 01 	call	0x2fc	; 0x2fc <PLL_SetMode>
- 6ca:	ff cf       	rjmp	.-2      	; 0x6ca <main+0x74>
+ 624:	80 91 03 01 	lds	r24, 0x0103	; 0x800103 <FMFrequency>
+ 628:	90 91 04 01 	lds	r25, 0x0104	; 0x800104 <FMFrequency+0x1>
+ 62c:	0e 94 ca 02 	call	0x594	; 0x594 <PLL_Tune>
+ 630:	80 93 16 01 	sts	0x0116, r24	; 0x800116 <__data_end>
+ 634:	ff cf       	rjmp	.-2      	; 0x634 <main+0x2e>
 
-000006cc <_exit>:
- 6cc:	f8 94       	cli
+00000636 <_exit>:
+ 636:	f8 94       	cli
 
-000006ce <__stop_program>:
- 6ce:	ff cf       	rjmp	.-2      	; 0x6ce <__stop_program>
+00000638 <__stop_program>:
+ 638:	ff cf       	rjmp	.-2      	; 0x638 <__stop_program>

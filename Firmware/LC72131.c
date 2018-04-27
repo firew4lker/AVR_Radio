@@ -2,7 +2,7 @@
 #include <inttypes.h>
 #include <util/delay.h>
 
-#include "SanyoCCB.h"
+#include "LC72131.h"
 #include "bit_manipulation.h"
 
 // Base delay (us).  Also used to time the CL (clock) line.

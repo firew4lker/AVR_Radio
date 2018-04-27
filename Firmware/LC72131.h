@@ -1,5 +1,5 @@
-#ifndef SanyoCCB_h
-#define SanyoCCB_h
+#ifndef LC72131_h
+#define LC72131_h
 
 #include <inttypes.h>
 
@@ -27,11 +27,11 @@
 #define DO      3
 
 
-void LC72131_init();
+void LC72131_init(void);
 void writeByte(uint8_t data);
-uint8_t readByte();
+uint8_t readByte(void);
 void ccb(uint8_t address, uint8_t *data, int8_t dataLength, uint8_t mode);
-uint8_t diPinState();
+uint8_t diPinState(void);
 void LC72131_write(uint8_t address, uint8_t *data, int8_t dataLength);
 void LC72131_read(uint8_t address, uint8_t *data, int8_t dataLength);
 

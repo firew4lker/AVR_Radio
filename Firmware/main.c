@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "hd44780.h"
-#include "SanyoCCB.h"
+#include "LC72131.h"
 #include "bit_manipulation.h"
 
 
@@ -68,7 +68,7 @@ uint8_t pll_in2[3];  // IN2 consist of 3 bytes in total. Page 9 of the Datasheet
 
 // Initial frequencies for the PLL.
 uint16_t FMFrequency = 978;   // MHz * 10
-uint16_t AMFrequency = 53;    // KHZ / 10
+uint16_t AMFrequency = 73;    // KHZ / 10
 
 uint8_t band = PLL_BAND_FM;
 uint8_t tuned = 0;
@@ -85,23 +85,12 @@ int main(void){
 
     lcd_puts("This is a test!");
 
-    _delay_ms(2000);
-
-    lcd_clrscr();
-
     LC72131_init();
     PLL_SetMode(PLL_BAND_FM);
     tuned = PLL_Tune(FMFrequency);
 
-    _delay_ms(5000);
-
-     PLL_SetMode(PLL_MUTE);
-
-     _delay_ms(5000);
-
-     PLL_SetMode(PLL_UNMUTE);
-
     while(1){
+
 
     };
 
@@ -126,26 +115,26 @@ void PLL_Init() {
 
     bitSet(pll_in2[0], IN2_IFS);   // IF counter in normal mode. Page 12 and 15 of the Datasheet.
     bitSet(pll_in2[1], IN2_UL0);   // Phase error detection width = 0us. UL1=0, UL0=1. Page 11 of the Datasheet.
-    bitSet(pll_in2[2], IN2_BO2);   // Mute off / normal tuner mode
+    bitSet(pll_in2[2], IN2_BO1);   // Mute off / normal tuner mode
 }
 
 void PLL_SetMode(uint8_t mode) {
 
   switch(mode) {
     case PLL_STEREO:
-      bitClear(pll_in2[2], IN2_BO3);
+      bitClear(pll_in2[2], IN2_BO4);
       break;
 
     case PLL_MONO:
-      bitSet(pll_in2[2], IN2_BO3);
+      bitSet(pll_in2[2], IN2_BO4);
       break;
 
     case PLL_MUTE:
-      bitClear(pll_in2[2], IN2_BO2);
+      bitClear(pll_in2[2], IN2_BO1);
       break;
 
     case PLL_UNMUTE:
-      bitSet(pll_in2[2], IN2_BO2);
+      bitSet(pll_in2[2], IN2_BO1);
       break;
 
     case PLL_BAND_FM:
@@ -154,23 +143,24 @@ void PLL_SetMode(uint8_t mode) {
       bitWrite(pll_in1[0], IN1_R3,  0); //
       bitWrite(pll_in1[0], IN1_XS,  1); // The PLL uses a 7.2 MHz Crystal. Page 10 of the Datasheet.
       bitWrite(pll_in1[0], IN1_DVS, 1); // Programmable Divider divisor = 2
-      bitWrite(pll_in2[0], IN2_GT0, 0); // IF counter mesurement period = 32ms
+      bitWrite(pll_in2[0], IN2_GT0, 0); // IF counter measurement period = 32ms
       bitWrite(pll_in2[0], IN2_GT1, 1); //
       bitWrite(pll_in2[1], IN2_DZ0, 1); // Dead zone = DZB
       bitWrite(pll_in2[1], IN2_DZ1, 0); //
-      bitWrite(pll_in2[2], IN2_BO1, 0); // FM mode
+      bitWrite(pll_in2[2], IN2_BO2, 1); // FM mode
       break;
 
     case PLL_BAND_AM:
       band = PLL_BAND_AM;
       bitWrite(pll_in1[0], IN1_R0,  0); // Reference frequency = 10kHz
       bitWrite(pll_in1[0], IN1_R3,  1); //
+      bitWrite(pll_in1[0], IN1_XS,  1); // The PLL uses a 7.2 MHz Crystal. Page 10 of the Datasheet.
       bitWrite(pll_in1[0], IN1_DVS, 0); // Programmable Divider divisor = 1
       bitWrite(pll_in2[0], IN2_GT0, 1); // IF counter mesurement period = 8ms
       bitWrite(pll_in2[0], IN2_GT1, 0); //
       bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone = DZC
       bitWrite(pll_in2[1], IN2_DZ1, 1); //
-      bitWrite(pll_in2[2], IN2_BO1, 1); // AM mode
+      bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
       break;
   }
   LC72131_write(0x82, pll_in1, 3);
@@ -190,9 +180,7 @@ void PLL_SetMode(uint8_t mode) {
 \************************************************************/
 uint8_t PLL_Tune(uint16_t frequency) {
 
-    uint16_t fpd = 0;
-    uint8_t i = 0;
-    uint8_t r[3];
+    uint16_t fpd = 0;      // Frequency Programmable Divider (FPD).
 
     switch(band) {
         case PLL_BAND_FM:
@@ -208,9 +196,9 @@ uint8_t PLL_Tune(uint16_t frequency) {
         default: return 1;
     }
 
-    PLL_SetMode(PLL_MUTE);   // YST93x only injects FI signal into the PLL when in MUTE mode
+    PLL_SetMode(PLL_MUTE);
 
-    // Reset the IF counter and program the Frequency Programmable Divider (fpd)
+    // Reset the IF counter and program the Frequency Programmable Divider (FPD).
     bitClear(pll_in1[0], IN1_CTE);
     pll_in1[1] = (uint8_t) (fpd >> 8);
     pll_in1[2] =  (uint8_t) (fpd & 0x00ff);
@@ -220,15 +208,7 @@ uint8_t PLL_Tune(uint16_t frequency) {
     bitSet(pll_in1[0], IN1_CTE);
     LC72131_write(0x82, pll_in1, 3);
 
-    // Wait for PLL to be locked (DO_UL == 1)
-    while(i < 50) {
-        _delay_ms(10);
-        LC72131_read(0xa2, r, 3);  // Discard the 1st result: it is latched from the last count (as said on the datasheet)
-        LC72131_read(0xa2, r, 3);  // The 20 rightmost bits from r[0..2] are the IF counter result
-        i = (bitRead(r[0], DO_UL)) ? 100 : i + 1;
-    };
-
-    PLL_SetMode(PLL_UNMUTE);   // Mute off / normal tuner mode
+    PLL_SetMode(PLL_UNMUTE);
 
     return 0;
 }
