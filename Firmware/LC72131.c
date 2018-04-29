@@ -6,13 +6,15 @@
 #include "bit_manipulation.h"
 
 // Base delay (us).  Also used to time the CL (clock) line.
-// 100us should be enough even for slow CCB devices.
-#define CCB_DELAY 100
+// 50us should be enough.
+#define CCB_DELAY 50
 
 
 /******************************************\
+ *                                        *
  *                 init()                 *
  *  Set pin functions and initial states  *
+ *                                        *
 \******************************************/
 void LC72131_init() {
 
@@ -36,42 +38,52 @@ void LC72131_init() {
 }
 
 
-/************************************\
- *           writeByte()            *
- *  Send a single byte via CCB bus  *
-\************************************/
+/******************************************\
+ *                                        *
+ *              writeByte()               *
+ *     Send a single byte via CCB bus     *
+ *                                        *
+\******************************************/
 void writeByte(uint8_t data) {
+
 	// Send one byte out bia CCB bus (LSB first)
 	for(int8_t i = 0; i <= 7; i++) {
 		digitalWrite(DO, &DO_PORT, bitRead(data, i));
 		digitalWrite(CL, &CL_PORT, 1); _delay_us(CCB_DELAY);
 		digitalWrite(CL, &CL_PORT, 0); _delay_us(CCB_DELAY);
-	}
+	};
 }
 
 
-/***************************************\
- *             readByte()              *
- *  Receive a single byte via CCB bus  *
-\***************************************/
+/******************************************\
+ *                                        *
+ *               readByte()               *
+ *    Receive a single byte via CCB bus   *
+ *                                        *
+\******************************************/
 uint8_t readByte() {
+
 	uint8_t data = 0;
 	// Receive one byte from the CCB bus (MSB first)
 	for(int8_t i = 7; i >= 0; i--) {
 		digitalWrite(CL, &CL_PORT, 1); _delay_us(CCB_DELAY);
 		bitWrite(data, i, digitalRead(DI, &DI_PIN));
 		digitalWrite(CL, &CL_PORT, 0); _delay_us(CCB_DELAY);
-	}
+	};
+
 	return data;
 }
 
 
-/*****************************************\
- *                 ccb()                 *
- *  The universal send/receive function  *
-\*****************************************/
+/******************************************\
+ *                                        *
+ *                 ccb()                  *
+ *  The universal send/receive function   *
+ *                                        *
+\******************************************/
 void ccb(uint8_t address, uint8_t *data, int8_t dataLength, uint8_t mode) {
-	int8_t i; // i may reach negative values in the counters
+
+    int8_t i; // i may reach negative values in the counters
 	          // dataLength is typed "int8_t" for compatibility with this counter
 
 	// Send the address, with the nibbles swapped (required by the CCB protocol to support 4-bit addresses)
@@ -96,7 +108,7 @@ void ccb(uint8_t address, uint8_t *data, int8_t dataLength, uint8_t mode) {
 		for(i = 0; i < dataLength; i++)
 			data[i] = readByte();
 		break;
-	}
+	};
 
 	digitalWrite(CE, &CE_PORT, 0);
 	_delay_us(CCB_DELAY);
@@ -124,6 +136,7 @@ uint8_t diPinState() {
  * as the one shown on the device's datasheets          *
 \********************************************************/
 void LC72131_write(uint8_t address, uint8_t *data, int8_t dataLength) {
+
 	ccb(address, data, dataLength, _CCB_SEND);
 }
 
@@ -133,5 +146,6 @@ void LC72131_write(uint8_t address, uint8_t *data, int8_t dataLength) {
  *  receive dataLength (up to 127) bytes via CCB bus  *
 \******************************************************/
 void LC72131_read(uint8_t address, uint8_t *data, int8_t dataLength) {
+
 	ccb(address, data, dataLength, _CCB_RECEIVE);
 }

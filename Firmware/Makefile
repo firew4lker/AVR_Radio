@@ -14,7 +14,7 @@ FORMAT = ihex
 TARGET = $(PROJECTNAME)
 
 
-CSRC = $(PROJECTNAME).c hd44780.c SanyoCCB.c bit_manipulation.c
+CSRC = $(PROJECTNAME).c hd44780.c LC72131.c bit_manipulation.c
 
 
 ASRC = 

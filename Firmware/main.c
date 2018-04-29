@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <avr/pgmspace.h>
@@ -9,6 +10,10 @@
 #include "LC72131.h"
 #include "bit_manipulation.h"
 
+// LC72131 addresses. Page 13 of the Datasheet.
+#define LC72131_ADDR_IN1	0x82
+#define LC72131_ADDR_IN2	0x92
+#define LC72131_ADDR_OUT	0xA2
 
 // LC72131 IN1, byte 0. Page 9 of the Datasheet.
 #define IN1_SNS    0
@@ -63,27 +68,143 @@
 #define PLL_BAND_FM 5
 #define PLL_BAND_AM 6
 
+#define TUNED      PC4   // Pin 14 of the PLL. When pulled LOW, PLL is locked.
+#define TUNED_PORT PORTC
+#define TUNED_DDR  DDRC
+#define TUNED_PIN  PINC
+
+#define STEREO      PC5   // Pin 15 of the PLL. When pulled LOW, PLL is stereo.
+#define STEREO_PORT PORTC
+#define STEREO_DDR  DDRC
+#define STEREO_PIN  PINC
+
+#define UPSW       PB0      // Switch for increasing the frequency.
+#define UPSW_PORT  PORTB
+#define UPSW_DDR   DDRB
+#define UPSW_PIN   PINB
+
+#define DOWNSW       PB1    // Switch for decreasing the frequency.
+#define DOWNSW_PORT  PORTB
+#define DOWNSW_DDR   DDRB
+#define DOWNSW_PIN   PINB
+
+#define AMFMSW       PB2    // Switch for FM/AM mode.
+#define AMFMSW_PORT  PORTB
+#define AMFMSW_DDR   DDRB
+#define AMFMSW_PIN   PINB
+
+#define NONE    0   // Values used to the switch detection press function.
+#define UP      1
+#define DOWN    2
+#define TNMODE  3
+
+#define STSYMBOL 0 // Custom lcd symbol for stereo mode.
+#define TNSYMBOL 1 // Custom lcd symbol for tuned mode.
+
+/*
+
+PLL pin    Direction       Function
+BO0        PLL -> Tuner    Not used
+BO1        PLL -> Tuner    Band selector (0 = FM; 1 = AM)
+BO2        PLL -> Tuner    Mute / IF output (0 = Mute / IF counter mode
+                                             1 = Normal tuner mode)
+BO3        PLL -> Tuner    Audio mode (0 = Stereo; 1 = Mono)
+BO4        PLL -> Tuner    Not used
+IO0        Tuner -> PLL    Not used (pulled high.  Reads "1")
+IO1        Tuner -> PLL    Stereo indicator (0 = Stereo; 1 = Mono)
+
+  FM
+Antenna +-----------------------------+
+    +---|                          1  |- CE
+    +---|                          2  |- DI
+        |        UNKNOWN PLL       3  |- CL
+        |       WITH LC721131      4  |- DO
+        |        AND LA1838        5  |- GND
+        |                          6  |- FM IF OUT
+        |                          7  |- VDD +5 v
+        |                          8  |- VCC +12 v
+        |                          9  |- FM DET OUT
+        |                         10  |- Out-L
+        |                         11  |- GND
+        |                         12  |- Out-R
+  AM    |                         13  |- MUTE
+Antenna |                         14  |- TUNED
+    +---|                         15  |- STEREO
+    |   |                             |
+    |   |                             |
+    +---|                             |
+        +-----------------------------+
+
+PLL to ATmega328p connections:
+
+ATmega328p              PLL
+PCO (CE)----------------CE  (1)
+PC1 (DI)----------------DO  (4)
+PC2 (CL)----------------CL  (3)
+PC3 (DO)----------------D1  (2)
+
+PC4 (TUNED)-------------TUNED  (14)
+PC5 (STEREO)------------STEREO (15)
+*/
+
 uint8_t pll_in1[3];  // IN1 consist of 3 bytes in total. Page 9 of the Datasheet.
 uint8_t pll_in2[3];  // IN2 consist of 3 bytes in total. Page 9 of the Datasheet.
 
 // Initial frequencies for the PLL.
-uint16_t FMFrequency = 978;   // MHz * 10
-uint16_t AMFrequency = 73;    // KHZ / 10
+volatile uint16_t FMFrequency = 978;   // MHz / 10
+volatile uint16_t AMFrequency = 73;    // KHz * 10
 
 uint8_t band = PLL_BAND_FM;
 uint8_t tuned = 0;
 
-void PLL_Init(void);
-void PLL_SetMode(uint8_t);
-uint8_t PLL_Tune(uint16_t);
+volatile uint16_t tick=0;  // Time keeping variable in milliseconds.
+volatile uint16_t now=0;   // Time reference variable.
+
+void PLL_Init(void);          // Function to initialize the PLL.
+void PLL_SetMode(uint8_t);    // Function to control the mode of the PLL.
+uint8_t PLL_Tune(uint16_t);   // Function to tune in the frequency of the PLL.
+void millis_init(void);       // Function to initialize the timer/counter0 running.
+void lcdupdate(void);         // Function to update the lcd content.
+uint8_t readsw (void);        // Function for polling the control switches.
+void customchar(void);        // Function for crating some custom lcd characters.
+
+void utofix(uint16_t, char *);    // Function to convert an unsigned int to printable number with decimal point.
+                                  // E.g. 1009 gets converted to the char array "100.9" (5 bytes).
 
 int main(void){
 
-    lcd_init();             // LCD initialization.
-    lcd_clrscr();           // Clear the LCD.
-    lcd_home();             // Set the cursor at home position.
+    uint8_t toggletn=(1^0);
+    uint8_t tunemode=0;
 
-    lcd_puts("This is a test!");
+    lcd_init();                   // LCD initialization.
+    lcd_clrscr();                 // Clear the LCD.
+    lcd_home();                   // Set the cursor at home position.
+    customchar();                 // Create custom characters for STEREO and TUNED symbols.
+
+    TUNED_DDR &=  ~(1<<TUNED);    // TUNED pin as Input.
+    TUNED_PORT |= (1<<TUNED);     // TUNED pin pull-up resistor enabled.
+
+    STEREO_DDR &=  ~(1<<STEREO);  // STEREO pin as Input.
+    STEREO_PORT |= (1<<STEREO);   // STEREO pin pull-up resistor enabled.
+
+    UPSW_DDR &=  ~(1<<UPSW);      // UP switch pin as Input.
+    UPSW_PORT |= (1<<UPSW);       // UP switch pin pull-up resistor enabled.
+
+    DOWNSW_DDR &=  ~(1<<DOWNSW);  // UP switch pin as Input.
+    DOWNSW_PORT |= (1<<DOWNSW);   // UP switch pin pull-up resistor enabled.
+
+    AMFMSW_DDR &=  ~(1<<AMFMSW);  // UP switch pin as Input.
+    AMFMSW_PORT |= (1<<AMFMSW);   // UP switch pin pull-up resistor enabled.
+
+
+    millis_init();                // Starting the time keeping function.
+
+    sei();                        // Enabling global Interrupts.
+
+    lcd_puts_P("-- AVR RADIO --");
+    _delay_ms(2000);
+
+    lcd_clrscr();
 
     LC72131_init();
     PLL_SetMode(PLL_BAND_FM);
@@ -91,16 +212,137 @@ int main(void){
 
     while(1){
 
+        if (readsw()==UP && tunemode==1){
+            tuned=0;
+            lcdupdate();
+
+            while(tuned==0){
+                FMFrequency++;
+                if (FMFrequency >= 1080) FMFrequency=875;
+                tuned = PLL_Tune(FMFrequency);
+            };
+
+        }else if (readsw()==UP && tunemode==0){
+
+            FMFrequency++;
+            if (FMFrequency >= 1080) FMFrequency=875;
+            tuned = PLL_Tune(FMFrequency);
+        };
+
+        if (readsw()==DOWN && tunemode==1){
+
+            tuned=0;
+            lcdupdate();
+
+            while(tuned==0){
+                FMFrequency--;
+                if (FMFrequency <= 875) FMFrequency=1080;
+                tuned = PLL_Tune(FMFrequency);
+                lcdupdate();
+            };
+
+        }else if (readsw()==DOWN && tunemode==0){
+
+            FMFrequency--;
+            if (FMFrequency <= 875) FMFrequency=1080;
+            tuned = PLL_Tune(FMFrequency);
+        };
+
+        if (readsw()==TNMODE){
+
+            tunemode ^= toggletn;
+
+        };
+
+        lcdupdate();
+
+        if (tunemode==0){
+            lcd_gotoxy(0,1);
+            lcd_puts_P("MANUAL SCAN");
+            _delay_ms(200);
+        }else{
+            lcd_gotoxy(0,1);
+            lcd_puts_P("AUTO SCAN  ");
+            _delay_ms(200);
+        };
+
+        _delay_ms(10);
 
     };
 
     return 0;
 }
 
+uint8_t readsw (){
+
+    if (digitalRead(UPSW,&UPSW_PIN)==0){
+        _delay_ms(10);  // Some debounce time.
+        if (digitalRead(UPSW,&UPSW_PIN)==0) {
+            return UP;
+        };
+    };
+
+    if (digitalRead(DOWNSW,&DOWNSW_PIN)==0){
+        _delay_ms(10);  // Some debounce time.
+        if (digitalRead(DOWNSW,&DOWNSW_PIN)==0) {
+            return DOWN;
+        };
+    };
+
+    if (digitalRead(AMFMSW,&AMFMSW_PIN)==0){
+        _delay_ms(10);  // Some debounce time.
+        if (digitalRead(AMFMSW,&AMFMSW_PIN)==0) {
+            return TNMODE;
+        };
+    };
+
+    return NONE;
+
+}
+
+void lcdupdate() {
+
+    char s[10];                   // Temporary char array for printing on the LCD.
+
+    lcd_home();
+
+    if (band==PLL_BAND_FM){
+        utofix(FMFrequency,s);
+        lcd_puts_P("FM ");
+        lcd_puts(s);
+        lcd_puts_P(" MHz ");
+    } else {
+        utofix(AMFrequency,s);
+        lcd_puts_P("AM ");
+        lcd_puts(s);
+        lcd_puts_P(" KHz ");
+    };
+
+    if (digitalRead(STEREO,&STEREO_PIN)==0){
+        lcd_gotoxy(13,0);
+        lcd_putc('[');
+        lcd_putc(STSYMBOL);
+        lcd_putc(']');
+    } else {
+        lcd_gotoxy(13,0);
+        lcd_puts("[ ]");
+    };
+
+    if (tuned==1){
+        lcd_gotoxy(13,1);
+        lcd_putc('[');
+        lcd_putc(TNSYMBOL);
+        lcd_putc(']');
+
+    } else {
+        lcd_gotoxy(13,1);
+        lcd_puts("[ ]");
+    };
+}
 
 /************************************************\
  *                PLL_Init()                    *
- * Initialize the PLL settings vectors with     *
+ *      Initialize the PLL settings  with       *
  * parameters common to booth AM and FM modes   *
 \************************************************/
 void PLL_Init() {
@@ -120,51 +362,60 @@ void PLL_Init() {
 
 void PLL_SetMode(uint8_t mode) {
 
-  switch(mode) {
-    case PLL_STEREO:
-      bitClear(pll_in2[2], IN2_BO4);
-      break;
+    switch(mode) {
 
-    case PLL_MONO:
-      bitSet(pll_in2[2], IN2_BO4);
-      break;
+        case PLL_STEREO:
+            bitClear(pll_in2[2], IN2_BO4);
+            break;
 
-    case PLL_MUTE:
-      bitClear(pll_in2[2], IN2_BO1);
-      break;
+        case PLL_MONO:
+            bitSet(pll_in2[2], IN2_BO4);
+            break;
 
-    case PLL_UNMUTE:
-      bitSet(pll_in2[2], IN2_BO1);
-      break;
+        case PLL_MUTE:
+            bitClear(pll_in2[2], IN2_BO1);
+            break;
 
-    case PLL_BAND_FM:
-      band = PLL_BAND_FM;
-      bitWrite(pll_in1[0], IN1_R0,  1); // Reference frequency = 50kHz
-      bitWrite(pll_in1[0], IN1_R3,  0); //
-      bitWrite(pll_in1[0], IN1_XS,  1); // The PLL uses a 7.2 MHz Crystal. Page 10 of the Datasheet.
-      bitWrite(pll_in1[0], IN1_DVS, 1); // Programmable Divider divisor = 2
-      bitWrite(pll_in2[0], IN2_GT0, 0); // IF counter measurement period = 32ms
-      bitWrite(pll_in2[0], IN2_GT1, 1); //
-      bitWrite(pll_in2[1], IN2_DZ0, 1); // Dead zone = DZB
-      bitWrite(pll_in2[1], IN2_DZ1, 0); //
-      bitWrite(pll_in2[2], IN2_BO2, 1); // FM mode
-      break;
+        case PLL_UNMUTE:
+            bitSet(pll_in2[2], IN2_BO1);
+            break;
 
-    case PLL_BAND_AM:
-      band = PLL_BAND_AM;
-      bitWrite(pll_in1[0], IN1_R0,  0); // Reference frequency = 10kHz
-      bitWrite(pll_in1[0], IN1_R3,  1); //
-      bitWrite(pll_in1[0], IN1_XS,  1); // The PLL uses a 7.2 MHz Crystal. Page 10 of the Datasheet.
-      bitWrite(pll_in1[0], IN1_DVS, 0); // Programmable Divider divisor = 1
-      bitWrite(pll_in2[0], IN2_GT0, 1); // IF counter mesurement period = 8ms
-      bitWrite(pll_in2[0], IN2_GT1, 0); //
-      bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone = DZC
-      bitWrite(pll_in2[1], IN2_DZ1, 1); //
-      bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
-      break;
-  }
-  LC72131_write(0x82, pll_in1, 3);
-  LC72131_write(0x92, pll_in2, 3);
+        case PLL_BAND_FM:
+            band = PLL_BAND_FM;
+            bitWrite(pll_in1[0], IN1_R0,  1); // Reference frequency = 50kHz. R3=0, R2=0, R2=0, R1=1.
+            bitWrite(pll_in1[0], IN1_R1,  0);
+            bitWrite(pll_in1[0], IN1_R2,  0);
+            bitWrite(pll_in1[0], IN1_R3,  0);
+
+            bitWrite(pll_in1[0], IN1_XS,  1); // The PLL uses a 7.2 MHz Crystal. Page 10 of the Datasheet.
+            bitWrite(pll_in1[0], IN1_DVS, 1); // Programmable Divider divisor = 2
+            bitWrite(pll_in2[0], IN2_GT0, 0); // IF counter measurement period = 32ms
+            bitWrite(pll_in2[0], IN2_GT1, 1); //
+            bitWrite(pll_in2[1], IN2_DZ0, 1); // Dead zone (DZB).
+            bitWrite(pll_in2[1], IN2_DZ1, 0); //
+            bitWrite(pll_in2[2], IN2_BO2, 1); // FM mode
+            break;
+
+        case PLL_BAND_AM:
+            band = PLL_BAND_AM;
+            bitWrite(pll_in1[0], IN1_R0,  0); // Reference frequency = 10kHz. R3=1, R2=0, R2=0, R1=0.
+            bitWrite(pll_in1[0], IN1_R1,  0);
+            bitWrite(pll_in1[0], IN1_R2,  0);
+            bitWrite(pll_in1[0], IN1_R3,  1);
+
+            bitWrite(pll_in1[0], IN1_XS,  1); // The PLL uses a 7.2 MHz Crystal. Page 10 of the Datasheet.
+            bitWrite(pll_in1[0], IN1_DVS, 0); // Programmable Divider divisor = 1
+            bitWrite(pll_in2[0], IN2_GT0, 1); // IF counter measurement period = 8ms
+            bitWrite(pll_in2[0], IN2_GT1, 0); //
+            bitWrite(pll_in2[1], IN2_DZ0, 0); // Dead zone (DZC).
+            bitWrite(pll_in2[1], IN2_DZ1, 1); //
+            bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
+            break;
+        }
+
+    LC72131_write(LC72131_ADDR_IN1, pll_in1, 3);
+    LC72131_write(LC72131_ADDR_IN2, pll_in2, 3);
+
 }
 
 /************************************************************\
@@ -175,16 +426,26 @@ void PLL_SetMode(uint8_t mode) {
  * The frequency divisors was chosen in a way the frequency *
  * representation can be directly sent to the PLL and is    *
  * easy to represent:                                       *
- * - FM mode (divisor = 100): frequency (MHz) * 10          *
- * - AM mode (divisor = 10):  frequency (kHZ) / 10          *
+ *                                                          *
+ *            FPD=(FM_FREQ+IF)/REF_FREQ/PRESCALER           *
+ *                                                          *
+ *           E.g. for an FM frequency of 90 MHz             *
+ *           FPD=(90000000+10700000/50000/2=1007            *
+ *                                                          *
+ *               This is equal to 900+107=1007              *
+ *   So, we can load the frequency+IF directly to the FPD   *
+ *                                                          *
+ *                                                          *
+ *                                                          *
 \************************************************************/
 uint8_t PLL_Tune(uint16_t frequency) {
 
     uint16_t fpd = 0;      // Frequency Programmable Divider (FPD).
 
+    uint8_t tuned=0;
+
     switch(band) {
         case PLL_BAND_FM:
-        // FM: fpd = (frequency + FI) / (50 * 2)
         fpd = (frequency + 107);
         break;
 
@@ -196,19 +457,70 @@ uint8_t PLL_Tune(uint16_t frequency) {
         default: return 1;
     }
 
-    PLL_SetMode(PLL_MUTE);
+    pll_in1[1] = (uint8_t) (fpd >> 8);          // Loading the HIGH byte to the Programmable Divider.
+    pll_in1[2] =  (uint8_t) (fpd & 0x00ff);     // Loading the LOW byte to the Programmable Divider.
 
-    // Reset the IF counter and program the Frequency Programmable Divider (FPD).
-    bitClear(pll_in1[0], IN1_CTE);
-    pll_in1[1] = (uint8_t) (fpd >> 8);
-    pll_in1[2] =  (uint8_t) (fpd & 0x00ff);
-    LC72131_write(0x82, pll_in1, 3);
+    LC72131_write(LC72131_ADDR_IN1, pll_in1, 3);
 
-    // Start the IF counter
-    bitSet(pll_in1[0], IN1_CTE);
-    LC72131_write(0x82, pll_in1, 3);
+    _delay_ms(20); //Some delay to give time to the PLL tune output to set.
 
-    PLL_SetMode(PLL_UNMUTE);
+    if (digitalRead(TUNED,&TUNED_PIN)==0){
+        tuned=1;
+    };
 
-    return 0;
+    return tuned;
+}
+
+void millis_init(void){
+
+    TIMSK0 |= (1 << TOIE0);           // Enable overflow Interrupt υπερχείλισης for Timer/Counter0.
+    TCNT0 = 6;                        // Preload Timer with the calculated value for 1 msec.
+    TCCR0B |= (1<<CS01) | (1<<CS00);  // Start Timer/Counter0 with Prescaler 64.
+}
+
+// Interrupt every 1 msec. More than enough to read the encoders.
+ISR(TIMER0_OVF_vect){
+
+    tick++;
+    TCNT0 += 6;  // Preload Timer with the calculated value for 1 msec.
+}
+
+void utofix(uint16_t x, char *s){
+
+    uint16_t temp;
+    char str[10];
+
+    temp = x/10;
+    ultoa(temp,str,10);
+    strcpy(s,str);
+    strcat(s,".");
+    temp = (x%10);
+    ultoa(temp,str,10);
+    strcat(s,str);
+
+}
+
+void customchar(){
+
+    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8); //The 0 on this line may be 0-7
+    lcd_putc(0b01110);   //5x8 bitmap of character, in this example a backslash
+    lcd_putc(0b01001);
+    lcd_putc(0b01111);
+    lcd_putc(0b01001);
+    lcd_putc(0b11001);
+    lcd_putc(0b11011);
+    lcd_putc(0b00011);
+    lcd_putc(0b00000);
+    lcd_goto(0);
+
+    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8); //The 0 on this line may be 0-7
+    lcd_putc(0b10001);   //5x8 bitmap of character, in this example a backslash
+    lcd_putc(0b10101);
+    lcd_putc(0b10101);
+    lcd_putc(0b01110);
+    lcd_putc(0b00100);
+    lcd_putc(0b00100);
+    lcd_putc(0b00100);
+    lcd_putc(0b00000);
+    lcd_goto(0);
 }
