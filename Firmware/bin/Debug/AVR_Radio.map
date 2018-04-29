@@ -453,15 +453,15 @@ END GROUP
 .signature
  *(.signature*)
 
-.stab           0x0000000000000000     0x2988
+.stab           0x0000000000000000     0x29ac
  *(.stab)
  .stab          0x0000000000000000      0x66c obj/Debug/bit_manipulation.o
  .stab          0x000000000000066c      0xba0 obj/Debug/hd44780.o
                                         0xd5c (size before relaxing)
  .stab          0x000000000000120c      0x804 obj/Debug/LC72131.o
                                         0x9cc (size before relaxing)
- .stab          0x0000000000001a10      0xf78 obj/Debug/main.o
-                                       0x11e8 (size before relaxing)
+ .stab          0x0000000000001a10      0xf9c obj/Debug/main.o
+                                       0x120c (size before relaxing)
 
 .stabstr        0x0000000000000000     0x1415
  *(.stabstr)

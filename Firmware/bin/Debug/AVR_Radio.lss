@@ -9,21 +9,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
   2 .bss          0000000b  0080010a  0080010a  00000bc2  2**0
                   ALLOC
-  3 .stab         00002988  00000000  00000000  00000bc4  2**2
+  3 .stab         000029ac  00000000  00000000  00000bc4  2**2
                   CONTENTS, READONLY, DEBUGGING
-  4 .stabstr      00001415  00000000  00000000  0000354c  2**0
+  4 .stabstr      00001415  00000000  00000000  00003570  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .comment      00000011  00000000  00000000  00004961  2**0
+  5 .comment      00000011  00000000  00000000  00004985  2**0
                   CONTENTS, READONLY
-  6 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00004974  2**2
+  6 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00004998  2**2
                   CONTENTS, READONLY
-  7 .debug_info   000005f4  00000000  00000000  000049b4  2**0
+  7 .debug_info   000005f4  00000000  00000000  000049d8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_abbrev 000005a2  00000000  00000000  00004fa8  2**0
+  8 .debug_abbrev 000005a2  00000000  00000000  00004fcc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_line   0000001d  00000000  00000000  0000554a  2**0
+  9 .debug_line   0000001d  00000000  00000000  0000556e  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000208  00000000  00000000  00005567  2**0
+ 10 .debug_str    00000208  00000000  00000000  0000558b  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -1327,7 +1327,6 @@ ISR(TIMER0_OVF_vect){
  684:	11 24       	eor	r1, r1
  686:	8f 93       	push	r24
  688:	9f 93       	push	r25
-
     tick++;
  68a:	80 91 0c 01 	lds	r24, 0x010C	; 0x80010c <tick>
  68e:	90 91 0d 01 	lds	r25, 0x010D	; 0x80010d <tick+0x1>
@@ -1537,62 +1536,62 @@ void lcdupdate() {
 
 void customchar(){
 
-    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8);
+    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8);     // ______
  7f4:	80 e4       	ldi	r24, 0x40	; 64
  7f6:	0e 94 e7 00 	call	0x1ce	; 0x1ce <lcd_command>
-    lcd_putc(0b01110);
+    lcd_putc(0b01110);                          //| ### |
  7fa:	8e e0       	ldi	r24, 0x0E	; 14
  7fc:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b01001);
+    lcd_putc(0b01001);                          //| #  #|
  800:	89 e0       	ldi	r24, 0x09	; 9
  802:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b01111);
+    lcd_putc(0b01111);                          //| ####|
  806:	8f e0       	ldi	r24, 0x0F	; 15
  808:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b01001);
+    lcd_putc(0b01001);                          //| #  #|
  80c:	89 e0       	ldi	r24, 0x09	; 9
  80e:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b11001);
+    lcd_putc(0b11001);                          //|##  #|
  812:	89 e1       	ldi	r24, 0x19	; 25
  814:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b11011);
+    lcd_putc(0b11011);                          //|## ##|
  818:	8b e1       	ldi	r24, 0x1B	; 27
  81a:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b00011);
+    lcd_putc(0b00011);                          //|   ##|
  81e:	83 e0       	ldi	r24, 0x03	; 3
  820:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b00000);
+    lcd_putc(0b00000);                          //|_____|
  824:	80 e0       	ldi	r24, 0x00	; 0
  826:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
     lcd_goto(0);
  82a:	80 e0       	ldi	r24, 0x00	; 0
  82c:	0e 94 ea 00 	call	0x1d4	; 0x1d4 <lcd_goto>
 
-    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8);
+    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8);     // ______
  830:	88 e4       	ldi	r24, 0x48	; 72
  832:	0e 94 e7 00 	call	0x1ce	; 0x1ce <lcd_command>
-    lcd_putc(0b10001);
+    lcd_putc(0b10001);                          //|#   #|
  836:	81 e1       	ldi	r24, 0x11	; 17
  838:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b10101);
+    lcd_putc(0b10101);                          //|# # #|
  83c:	85 e1       	ldi	r24, 0x15	; 21
  83e:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b10101);
+    lcd_putc(0b10101);                          //|# # #|
  842:	85 e1       	ldi	r24, 0x15	; 21
  844:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b01110);
+    lcd_putc(0b01110);                          //| ### |
  848:	8e e0       	ldi	r24, 0x0E	; 14
  84a:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b00100);
+    lcd_putc(0b00100);                          //|  #  |
  84e:	84 e0       	ldi	r24, 0x04	; 4
  850:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b00100);
+    lcd_putc(0b00100);                          //|  #  |
  854:	84 e0       	ldi	r24, 0x04	; 4
  856:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b00100);
+    lcd_putc(0b00100);                          //|  #  |
  85a:	84 e0       	ldi	r24, 0x04	; 4
  85c:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
-    lcd_putc(0b00000);
+    lcd_putc(0b00000);                          //|_____|
  860:	80 e0       	ldi	r24, 0x00	; 0
  862:	0e 94 fa 00 	call	0x1f4	; 0x1f4 <lcd_putc>
     lcd_goto(0);
@@ -1673,146 +1672,146 @@ void customchar(){
  8de:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
  8e2:	81 30       	cpi	r24, 0x01	; 1
  8e4:	09 f0       	breq	.+2      	; 0x8e8 <main+0x7c>
- 8e6:	5a c0       	rjmp	.+180    	; 0x99c <__stack+0x9d>
+ 8e6:	58 c0       	rjmp	.+176    	; 0x998 <__stack+0x99>
  8e8:	c1 30       	cpi	r28, 0x01	; 1
  8ea:	09 f0       	breq	.+2      	; 0x8ee <main+0x82>
- 8ec:	57 c0       	rjmp	.+174    	; 0x99c <__stack+0x9d>
+ 8ec:	55 c0       	rjmp	.+170    	; 0x998 <__stack+0x99>
             tuned=0;
  8ee:	10 92 0e 01 	sts	0x010E, r1	; 0x80010e <tuned>
-            lcdupdate();
- 8f2:	0e 94 9b 03 	call	0x736	; 0x736 <lcdupdate>
             while(tuned==0){
- 8f6:	80 91 0e 01 	lds	r24, 0x010E	; 0x80010e <tuned>
- 8fa:	88 23       	and	r24, r24
- 8fc:	91 f1       	breq	.+100    	; 0x962 <__stack+0x63>
+ 8f2:	80 91 0e 01 	lds	r24, 0x010E	; 0x80010e <tuned>
+ 8f6:	88 23       	and	r24, r24
+ 8f8:	81 f1       	breq	.+96     	; 0x95a <__stack+0x5b>
         if (readsw()==DOWN && tunemode==1){
- 8fe:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
- 902:	82 30       	cpi	r24, 0x02	; 2
- 904:	09 f0       	breq	.+2      	; 0x908 <__stack+0x9>
- 906:	8b c0       	rjmp	.+278    	; 0xa1e <__stack+0x11f>
- 908:	c1 30       	cpi	r28, 0x01	; 1
- 90a:	09 f0       	breq	.+2      	; 0x90e <__stack+0xf>
- 90c:	88 c0       	rjmp	.+272    	; 0xa1e <__stack+0x11f>
+ 8fa:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
+ 8fe:	82 30       	cpi	r24, 0x02	; 2
+ 900:	09 f0       	breq	.+2      	; 0x904 <__stack+0x5>
+ 902:	8d c0       	rjmp	.+282    	; 0xa1e <__stack+0x11f>
+ 904:	c1 30       	cpi	r28, 0x01	; 1
+ 906:	09 f0       	breq	.+2      	; 0x90a <__stack+0xb>
+ 908:	8a c0       	rjmp	.+276    	; 0xa1e <__stack+0x11f>
             tuned=0;
- 90e:	10 92 0e 01 	sts	0x010E, r1	; 0x80010e <tuned>
-                lcdupdate();
- 912:	0e 94 9b 03 	call	0x736	; 0x736 <lcdupdate>
+ 90a:	10 92 0e 01 	sts	0x010E, r1	; 0x80010e <tuned>
             while(tuned==0){
- 916:	80 91 0e 01 	lds	r24, 0x010E	; 0x80010e <tuned>
- 91a:	88 23       	and	r24, r24
- 91c:	09 f4       	brne	.+2      	; 0x920 <__stack+0x21>
- 91e:	62 c0       	rjmp	.+196    	; 0x9e4 <__stack+0xe5>
+ 90e:	80 91 0e 01 	lds	r24, 0x010E	; 0x80010e <tuned>
+ 912:	88 23       	and	r24, r24
+ 914:	09 f4       	brne	.+2      	; 0x918 <__stack+0x19>
+ 916:	64 c0       	rjmp	.+200    	; 0x9e0 <__stack+0xe1>
         if (readsw()==TNMODE){
- 920:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
- 924:	83 30       	cpi	r24, 0x03	; 3
- 926:	09 f4       	brne	.+2      	; 0x92a <__stack+0x2b>
+ 918:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
+ 91c:	83 30       	cpi	r24, 0x03	; 3
+ 91e:	09 f4       	brne	.+2      	; 0x922 <__stack+0x23>
             tunemode ^= toggletn;
- 928:	cd 27       	eor	r28, r29
-        lcdupdate();
- 92a:	0e 94 9b 03 	call	0x736	; 0x736 <lcdupdate>
+ 920:	cd 27       	eor	r28, r29
             lcd_gotoxy(0,1);
- 92e:	61 e0       	ldi	r22, 0x01	; 1
- 930:	80 e0       	ldi	r24, 0x00	; 0
+ 922:	61 e0       	ldi	r22, 0x01	; 1
+ 924:	80 e0       	ldi	r24, 0x00	; 0
         if (tunemode==0){
- 932:	c1 11       	cpse	r28, r1
- 934:	98 c0       	rjmp	.+304    	; 0xa66 <__stack+0x167>
+ 926:	c1 11       	cpse	r28, r1
+ 928:	9e c0       	rjmp	.+316    	; 0xa66 <__stack+0x167>
             lcd_gotoxy(0,1);
- 936:	0e 94 ed 00 	call	0x1da	; 0x1da <lcd_gotoxy>
+ 92a:	0e 94 ed 00 	call	0x1da	; 0x1da <lcd_gotoxy>
             lcd_puts_P("MANUAL SCAN");
- 93a:	8e e7       	ldi	r24, 0x7E	; 126
- 93c:	90 e0       	ldi	r25, 0x00	; 0
+ 92e:	8e e7       	ldi	r24, 0x7E	; 126
+ 930:	90 e0       	ldi	r25, 0x00	; 0
             lcd_puts_P("AUTO SCAN  ");
- 93e:	0e 94 09 01 	call	0x212	; 0x212 <lcd_puts_p>
- 942:	8f ef       	ldi	r24, 0xFF	; 255
- 944:	93 ec       	ldi	r25, 0xC3	; 195
- 946:	29 e0       	ldi	r18, 0x09	; 9
- 948:	81 50       	subi	r24, 0x01	; 1
- 94a:	90 40       	sbci	r25, 0x00	; 0
- 94c:	20 40       	sbci	r18, 0x00	; 0
- 94e:	e1 f7       	brne	.-8      	; 0x948 <__stack+0x49>
- 950:	00 c0       	rjmp	.+0      	; 0x952 <__stack+0x53>
- 952:	00 00       	nop
- 954:	8f e3       	ldi	r24, 0x3F	; 63
- 956:	9c e9       	ldi	r25, 0x9C	; 156
- 958:	01 97       	sbiw	r24, 0x01	; 1
- 95a:	f1 f7       	brne	.-4      	; 0x958 <__stack+0x59>
- 95c:	00 c0       	rjmp	.+0      	; 0x95e <__stack+0x5f>
- 95e:	00 00       	nop
- 960:	be cf       	rjmp	.-132    	; 0x8de <main+0x72>
+ 932:	0e 94 09 01 	call	0x212	; 0x212 <lcd_puts_p>
+ 936:	8f ef       	ldi	r24, 0xFF	; 255
+ 938:	93 ec       	ldi	r25, 0xC3	; 195
+ 93a:	29 e0       	ldi	r18, 0x09	; 9
+ 93c:	81 50       	subi	r24, 0x01	; 1
+ 93e:	90 40       	sbci	r25, 0x00	; 0
+ 940:	20 40       	sbci	r18, 0x00	; 0
+ 942:	e1 f7       	brne	.-8      	; 0x93c <__stack+0x3d>
+ 944:	00 c0       	rjmp	.+0      	; 0x946 <__stack+0x47>
+ 946:	00 00       	nop
+        lcdupdate();
+ 948:	0e 94 9b 03 	call	0x736	; 0x736 <lcdupdate>
+ 94c:	8f e9       	ldi	r24, 0x9F	; 159
+ 94e:	9f e0       	ldi	r25, 0x0F	; 15
+ 950:	01 97       	sbiw	r24, 0x01	; 1
+ 952:	f1 f7       	brne	.-4      	; 0x950 <__stack+0x51>
+ 954:	00 c0       	rjmp	.+0      	; 0x956 <__stack+0x57>
+ 956:	00 00       	nop
+ 958:	c2 cf       	rjmp	.-124    	; 0x8de <main+0x72>
                 FMFrequency++;
- 962:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 966:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 96a:	01 96       	adiw	r24, 0x01	; 1
- 96c:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <FMFrequency+0x1>
- 970:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <FMFrequency>
+ 95a:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 95e:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 962:	01 96       	adiw	r24, 0x01	; 1
+ 964:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <FMFrequency+0x1>
+ 968:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <FMFrequency>
                 if (FMFrequency >= 1080) FMFrequency=875;
- 974:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 978:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 97c:	88 33       	cpi	r24, 0x38	; 56
- 97e:	94 40       	sbci	r25, 0x04	; 4
- 980:	20 f0       	brcs	.+8      	; 0x98a <__stack+0x8b>
- 982:	10 93 02 01 	sts	0x0102, r17	; 0x800102 <FMFrequency+0x1>
- 986:	00 93 01 01 	sts	0x0101, r16	; 0x800101 <FMFrequency>
+ 96c:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 970:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 974:	88 33       	cpi	r24, 0x38	; 56
+ 976:	94 40       	sbci	r25, 0x04	; 4
+ 978:	20 f0       	brcs	.+8      	; 0x982 <__stack+0x83>
+ 97a:	10 93 02 01 	sts	0x0102, r17	; 0x800102 <FMFrequency+0x1>
+ 97e:	00 93 01 01 	sts	0x0101, r16	; 0x800101 <FMFrequency>
                 tuned = PLL_Tune(FMFrequency);
- 98a:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 98e:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 992:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
- 996:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
- 99a:	ad cf       	rjmp	.-166    	; 0x8f6 <main+0x8a>
-        }else if (readsw()==UP && tunemode==0){
- 99c:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
- 9a0:	81 30       	cpi	r24, 0x01	; 1
- 9a2:	09 f0       	breq	.+2      	; 0x9a6 <__stack+0xa7>
- 9a4:	ac cf       	rjmp	.-168    	; 0x8fe <main+0x92>
- 9a6:	c1 11       	cpse	r28, r1
- 9a8:	aa cf       	rjmp	.-172    	; 0x8fe <main+0x92>
+ 982:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 986:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 98a:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
+ 98e:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
+                lcdupdate();
+ 992:	0e 94 9b 03 	call	0x736	; 0x736 <lcdupdate>
+ 996:	ad cf       	rjmp	.-166    	; 0x8f2 <main+0x86>
+        } else if (readsw()==UP && tunemode==0){
+ 998:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
+ 99c:	81 30       	cpi	r24, 0x01	; 1
+ 99e:	09 f0       	breq	.+2      	; 0x9a2 <__stack+0xa3>
+ 9a0:	ac cf       	rjmp	.-168    	; 0x8fa <main+0x8e>
+ 9a2:	c1 11       	cpse	r28, r1
+ 9a4:	aa cf       	rjmp	.-172    	; 0x8fa <main+0x8e>
             FMFrequency++;
- 9aa:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 9ae:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 9b2:	01 96       	adiw	r24, 0x01	; 1
- 9b4:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <FMFrequency+0x1>
- 9b8:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <FMFrequency>
+ 9a6:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 9aa:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 9ae:	01 96       	adiw	r24, 0x01	; 1
+ 9b0:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <FMFrequency+0x1>
+ 9b4:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <FMFrequency>
             if (FMFrequency >= 1080) FMFrequency=875;
- 9bc:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 9c0:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 9c4:	88 33       	cpi	r24, 0x38	; 56
- 9c6:	94 40       	sbci	r25, 0x04	; 4
- 9c8:	20 f0       	brcs	.+8      	; 0x9d2 <__stack+0xd3>
- 9ca:	10 93 02 01 	sts	0x0102, r17	; 0x800102 <FMFrequency+0x1>
- 9ce:	00 93 01 01 	sts	0x0101, r16	; 0x800101 <FMFrequency>
+ 9b8:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 9bc:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 9c0:	88 33       	cpi	r24, 0x38	; 56
+ 9c2:	94 40       	sbci	r25, 0x04	; 4
+ 9c4:	20 f0       	brcs	.+8      	; 0x9ce <__stack+0xcf>
+ 9c6:	10 93 02 01 	sts	0x0102, r17	; 0x800102 <FMFrequency+0x1>
+ 9ca:	00 93 01 01 	sts	0x0101, r16	; 0x800101 <FMFrequency>
             tuned = PLL_Tune(FMFrequency);
- 9d2:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 9d6:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 9da:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
- 9de:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
- 9e2:	8d cf       	rjmp	.-230    	; 0x8fe <main+0x92>
+ 9ce:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 9d2:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 9d6:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
+ 9da:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
+ 9de:	8d cf       	rjmp	.-230    	; 0x8fa <main+0x8e>
                 FMFrequency--;
- 9e4:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 9e8:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 9ec:	01 97       	sbiw	r24, 0x01	; 1
- 9ee:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <FMFrequency+0x1>
- 9f2:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <FMFrequency>
+ 9e0:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 9e4:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 9e8:	01 97       	sbiw	r24, 0x01	; 1
+ 9ea:	90 93 02 01 	sts	0x0102, r25	; 0x800102 <FMFrequency+0x1>
+ 9ee:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <FMFrequency>
                 if (FMFrequency <= 875) FMFrequency=1080;
- 9f6:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- 9fa:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- 9fe:	8c 36       	cpi	r24, 0x6C	; 108
- a00:	93 40       	sbci	r25, 0x03	; 3
- a02:	20 f4       	brcc	.+8      	; 0xa0c <__stack+0x10d>
- a04:	f0 92 02 01 	sts	0x0102, r15	; 0x800102 <FMFrequency+0x1>
- a08:	e0 92 01 01 	sts	0x0101, r14	; 0x800101 <FMFrequency>
+ 9f2:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ 9f6:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ 9fa:	8c 36       	cpi	r24, 0x6C	; 108
+ 9fc:	93 40       	sbci	r25, 0x03	; 3
+ 9fe:	20 f4       	brcc	.+8      	; 0xa08 <__stack+0x109>
+ a00:	f0 92 02 01 	sts	0x0102, r15	; 0x800102 <FMFrequency+0x1>
+ a04:	e0 92 01 01 	sts	0x0101, r14	; 0x800101 <FMFrequency>
                 tuned = PLL_Tune(FMFrequency);
- a0c:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
- a10:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
- a14:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
- a18:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
- a1c:	7a cf       	rjmp	.-268    	; 0x912 <__stack+0x13>
-        }else if (readsw()==DOWN && tunemode==0){
+ a08:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
+ a0c:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
+ a10:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
+ a14:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
+                lcdupdate();
+ a18:	0e 94 9b 03 	call	0x736	; 0x736 <lcdupdate>
+ a1c:	78 cf       	rjmp	.-272    	; 0x90e <__stack+0xf>
+        } else if (readsw()==DOWN && tunemode==0){
  a1e:	0e 94 7d 02 	call	0x4fa	; 0x4fa <readsw>
  a22:	82 30       	cpi	r24, 0x02	; 2
  a24:	09 f0       	breq	.+2      	; 0xa28 <__stack+0x129>
- a26:	7c cf       	rjmp	.-264    	; 0x920 <__stack+0x21>
+ a26:	78 cf       	rjmp	.-272    	; 0x918 <__stack+0x19>
  a28:	c1 11       	cpse	r28, r1
- a2a:	7a cf       	rjmp	.-268    	; 0x920 <__stack+0x21>
+ a2a:	76 cf       	rjmp	.-276    	; 0x918 <__stack+0x19>
             FMFrequency--;
  a2c:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <FMFrequency>
  a30:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
@@ -1832,13 +1831,13 @@ void customchar(){
  a58:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <FMFrequency+0x1>
  a5c:	0e 94 0e 03 	call	0x61c	; 0x61c <PLL_Tune>
  a60:	80 93 0e 01 	sts	0x010E, r24	; 0x80010e <tuned>
- a64:	5d cf       	rjmp	.-326    	; 0x920 <__stack+0x21>
+ a64:	59 cf       	rjmp	.-334    	; 0x918 <__stack+0x19>
             lcd_gotoxy(0,1);
  a66:	0e 94 ed 00 	call	0x1da	; 0x1da <lcd_gotoxy>
             lcd_puts_P("AUTO SCAN  ");
  a6a:	82 e7       	ldi	r24, 0x72	; 114
  a6c:	90 e0       	ldi	r25, 0x00	; 0
- a6e:	67 cf       	rjmp	.-306    	; 0x93e <__stack+0x3f>
+ a6e:	61 cf       	rjmp	.-318    	; 0x932 <__stack+0x33>
 
 00000a70 <__udivmodhi4>:
  a70:	aa 1b       	sub	r26, r26

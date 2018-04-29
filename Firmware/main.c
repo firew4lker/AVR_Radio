@@ -220,47 +220,35 @@ int main(void){
 
         if (readsw()==UP && tunemode==1){
             tuned=0;
-            lcdupdate();
-
             while(tuned==0){
                 FMFrequency++;
                 if (FMFrequency >= 1080) FMFrequency=875;
                 tuned = PLL_Tune(FMFrequency);
+                lcdupdate();
             };
-
-        }else if (readsw()==UP && tunemode==0){
-
+        } else if (readsw()==UP && tunemode==0){
             FMFrequency++;
             if (FMFrequency >= 1080) FMFrequency=875;
             tuned = PLL_Tune(FMFrequency);
         };
 
         if (readsw()==DOWN && tunemode==1){
-
             tuned=0;
-            lcdupdate();
-
             while(tuned==0){
                 FMFrequency--;
                 if (FMFrequency <= 875) FMFrequency=1080;
                 tuned = PLL_Tune(FMFrequency);
                 lcdupdate();
             };
-
-        }else if (readsw()==DOWN && tunemode==0){
-
+        } else if (readsw()==DOWN && tunemode==0){
             FMFrequency--;
             if (FMFrequency <= 875) FMFrequency=1080;
             tuned = PLL_Tune(FMFrequency);
         };
 
         if (readsw()==TNMODE){
-
             tunemode ^= toggletn;
-
         };
-
-        lcdupdate();
 
         if (tunemode==0){
             lcd_gotoxy(0,1);
@@ -272,7 +260,9 @@ int main(void){
             _delay_ms(200);
         };
 
-        _delay_ms(10);
+        lcdupdate();
+
+        _delay_ms(1);
 
     };
 
@@ -485,7 +475,6 @@ void millis_init(void){
 
 // Interrupt every 1 msec. More than enough to read the encoders.
 ISR(TIMER0_OVF_vect){
-
     tick++;
     TCNT0 += 6;  // Preload Timer with the calculated value for 1 msec.
 }
@@ -507,25 +496,25 @@ void utofix(uint16_t x, char *s){
 
 void customchar(){
 
-    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8);
-    lcd_putc(0b01110);
-    lcd_putc(0b01001);
-    lcd_putc(0b01111);
-    lcd_putc(0b01001);
-    lcd_putc(0b11001);
-    lcd_putc(0b11011);
-    lcd_putc(0b00011);
-    lcd_putc(0b00000);
+    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8);     // ______
+    lcd_putc(0b01110);                          //| ### |
+    lcd_putc(0b01001);                          //| #  #|
+    lcd_putc(0b01111);                          //| ####|
+    lcd_putc(0b01001);                          //| #  #|
+    lcd_putc(0b11001);                          //|##  #|
+    lcd_putc(0b11011);                          //|## ##|
+    lcd_putc(0b00011);                          //|   ##|
+    lcd_putc(0b00000);                          //|_____|
     lcd_goto(0);
 
-    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8);
-    lcd_putc(0b10001);
-    lcd_putc(0b10101);
-    lcd_putc(0b10101);
-    lcd_putc(0b01110);
-    lcd_putc(0b00100);
-    lcd_putc(0b00100);
-    lcd_putc(0b00100);
-    lcd_putc(0b00000);
+    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8);     // ______
+    lcd_putc(0b10001);                          //|#   #|
+    lcd_putc(0b10101);                          //|# # #|
+    lcd_putc(0b10101);                          //|# # #|
+    lcd_putc(0b01110);                          //| ### |
+    lcd_putc(0b00100);                          //|  #  |
+    lcd_putc(0b00100);                          //|  #  |
+    lcd_putc(0b00100);                          //|  #  |
+    lcd_putc(0b00000);                          //|_____|
     lcd_goto(0);
 }
