@@ -1,3 +1,10 @@
+/************************************************\
+ *            A simple AVR Radio                *
+ *    The code is based to the code written     *
+ *      by Rodolfo Broco Manin (RodLophus)      *
+ *    https://github.com/RodLophus/SanyoCCB     *
+\************************************************/
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
@@ -66,7 +73,7 @@
 #define PLL_MUTE    3
 #define PLL_UNMUTE  4
 #define PLL_BAND_FM 5
-#define PLL_BAND_AM 6
+//#define PLL_BAND_AM 6
 
 #define TUNED      PC4   // Pin 14 of the PLL. When pulled LOW, PLL is locked.
 #define TUNED_PORT PORTC
@@ -88,10 +95,10 @@
 #define DOWNSW_DDR   DDRB
 #define DOWNSW_PIN   PINB
 
-#define AMFMSW       PB2    // Switch for FM/AM mode.
-#define AMFMSW_PORT  PORTB
-#define AMFMSW_DDR   DDRB
-#define AMFMSW_PIN   PINB
+#define TUNESW       PB2    // Switch for FM/AM mode.
+#define TUNESW_PORT  PORTB
+#define TUNESW_DDR   DDRB
+#define TUNESW_PIN   PINB
 
 #define NONE    0   // Values used to the switch detection press function.
 #define UP      1
@@ -105,13 +112,12 @@
 
 PLL pin    Direction       Function
 BO0        PLL -> Tuner    Not used
-BO1        PLL -> Tuner    Band selector (0 = FM; 1 = AM)
-BO2        PLL -> Tuner    Mute / IF output (0 = Mute / IF counter mode
-                                             1 = Normal tuner mode)
-BO3        PLL -> Tuner    Audio mode (0 = Stereo; 1 = Mono)
-BO4        PLL -> Tuner    Not used
-IO0        Tuner -> PLL    Not used (pulled high.  Reads "1")
-IO1        Tuner -> PLL    Stereo indicator (0 = Stereo; 1 = Mono)
+BO1        PLL -> Tuner    Mute / IF output (0 = Mute / IF counter mode.
+BO2        PLL -> Tuner    Band selector (0 = FM; 1 = AM).
+BO3        PLL -> Tuner    Not used.
+BO4        PLL -> Tuner    Audio mode (0 = Stereo; 1 = Mono).
+IO0        Tuner -> PLL    Not used (pulled high.  Reads "1").
+IO1        Tuner -> PLL    Not used (pulled high.  Reads "1").
 
   FM
 Antenna +-----------------------------+
@@ -152,7 +158,7 @@ uint8_t pll_in2[3];  // IN2 consist of 3 bytes in total. Page 9 of the Datasheet
 
 // Initial frequencies for the PLL.
 volatile uint16_t FMFrequency = 978;   // MHz / 10
-volatile uint16_t AMFrequency = 73;    // KHz * 10
+//volatile uint16_t AMFrequency = 73;    // KHz * 10
 
 uint8_t band = PLL_BAND_FM;
 uint8_t tuned = 0;
@@ -193,8 +199,8 @@ int main(void){
     DOWNSW_DDR &=  ~(1<<DOWNSW);  // UP switch pin as Input.
     DOWNSW_PORT |= (1<<DOWNSW);   // UP switch pin pull-up resistor enabled.
 
-    AMFMSW_DDR &=  ~(1<<AMFMSW);  // UP switch pin as Input.
-    AMFMSW_PORT |= (1<<AMFMSW);   // UP switch pin pull-up resistor enabled.
+    TUNESW_DDR &=  ~(1<<TUNESW);  // UP switch pin as Input.
+    TUNESW_PORT |= (1<<TUNESW);   // UP switch pin pull-up resistor enabled.
 
 
     millis_init();                // Starting the time keeping function.
@@ -289,9 +295,9 @@ uint8_t readsw (){
         };
     };
 
-    if (digitalRead(AMFMSW,&AMFMSW_PIN)==0){
+    if (digitalRead(TUNESW,&TUNESW_PIN)==0){
         _delay_ms(10);  // Some debounce time.
-        if (digitalRead(AMFMSW,&AMFMSW_PIN)==0) {
+        if (digitalRead(TUNESW,&TUNESW_PIN)==0) {
             return TNMODE;
         };
     };
@@ -306,17 +312,17 @@ void lcdupdate() {
 
     lcd_home();
 
-    if (band==PLL_BAND_FM){
+//    if (band==PLL_BAND_FM){
         utofix(FMFrequency,s);
         lcd_puts_P("FM ");
         lcd_puts(s);
         lcd_puts_P(" MHz ");
-    } else {
-        utofix(AMFrequency,s);
-        lcd_puts_P("AM ");
-        lcd_puts(s);
-        lcd_puts_P(" KHz ");
-    };
+//    } else {
+//        utofix(AMFrequency,s);
+//        lcd_puts_P("AM ");
+//        lcd_puts(s);
+//        lcd_puts_P(" KHz ");
+//    };
 
     if (digitalRead(STEREO,&STEREO_PIN)==0){
         lcd_gotoxy(13,0);
@@ -342,8 +348,7 @@ void lcdupdate() {
 
 /************************************************\
  *                PLL_Init()                    *
- *      Initialize the PLL settings  with       *
- * parameters common to booth AM and FM modes   *
+ *        Initialize the PLL settings.          *
 \************************************************/
 void PLL_Init() {
 
@@ -396,7 +401,7 @@ void PLL_SetMode(uint8_t mode) {
             bitWrite(pll_in2[2], IN2_BO2, 1); // FM mode
             break;
 
-        case PLL_BAND_AM:
+/*        case PLL_BAND_AM:
             band = PLL_BAND_AM;
             bitWrite(pll_in1[0], IN1_R0,  0); // Reference frequency = 10kHz. R3=1, R2=0, R2=0, R1=0.
             bitWrite(pll_in1[0], IN1_R1,  0);
@@ -411,6 +416,7 @@ void PLL_SetMode(uint8_t mode) {
             bitWrite(pll_in2[1], IN2_DZ1, 1); //
             bitWrite(pll_in2[2], IN2_BO2, 0); // AM mode
             break;
+*/
         }
 
     LC72131_write(LC72131_ADDR_IN1, pll_in1, 3);
@@ -448,11 +454,11 @@ uint8_t PLL_Tune(uint16_t frequency) {
         fpd = (frequency + 107);
         break;
 
-        case PLL_BAND_AM:
+/*        case PLL_BAND_AM:
         // AM: fpd = ((frequency + FI) / 10) << 4
         fpd = (frequency + 45) << 4;
         break;
-
+*/
         default: return 1;
     }
 
