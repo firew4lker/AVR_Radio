@@ -1603,10 +1603,10 @@ void lcdupdate() {
 
 void customchar(){
 
-    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8); //The 0 on this line may be 0-7
+    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8);
  874:	80 e4       	ldi	r24, 0x40	; 64
  876:	0e 94 ec 00 	call	0x1d8	; 0x1d8 <lcd_command>
-    lcd_putc(0b01110);   //5x8 bitmap of character, in this example a backslash
+    lcd_putc(0b01110);
  87a:	8e e0       	ldi	r24, 0x0E	; 14
  87c:	0e 94 ff 00 	call	0x1fe	; 0x1fe <lcd_putc>
     lcd_putc(0b01001);
@@ -1634,10 +1634,10 @@ void customchar(){
  8aa:	80 e0       	ldi	r24, 0x00	; 0
  8ac:	0e 94 ef 00 	call	0x1de	; 0x1de <lcd_goto>
 
-    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8); //The 0 on this line may be 0-7
+    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8);
  8b0:	88 e4       	ldi	r24, 0x48	; 72
  8b2:	0e 94 ec 00 	call	0x1d8	; 0x1d8 <lcd_command>
-    lcd_putc(0b10001);   //5x8 bitmap of character, in this example a backslash
+    lcd_putc(0b10001);
  8b6:	81 e1       	ldi	r24, 0x11	; 17
  8b8:	0e 94 ff 00 	call	0x1fe	; 0x1fe <lcd_putc>
     lcd_putc(0b10101);

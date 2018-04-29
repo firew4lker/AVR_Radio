@@ -436,7 +436,6 @@ void PLL_SetMode(uint8_t mode) {
  *   So, we can load the frequency+IF directly to the FPD   *
  *                                                          *
  *                                                          *
- *                                                          *
 \************************************************************/
 uint8_t PLL_Tune(uint16_t frequency) {
 
@@ -502,8 +501,8 @@ void utofix(uint16_t x, char *s){
 
 void customchar(){
 
-    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8); //The 0 on this line may be 0-7
-    lcd_putc(0b01110);   //5x8 bitmap of character, in this example a backslash
+    lcd_command(_BV(LCD_CGRAM)+STSYMBOL*8);
+    lcd_putc(0b01110);
     lcd_putc(0b01001);
     lcd_putc(0b01111);
     lcd_putc(0b01001);
@@ -513,8 +512,8 @@ void customchar(){
     lcd_putc(0b00000);
     lcd_goto(0);
 
-    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8); //The 0 on this line may be 0-7
-    lcd_putc(0b10001);   //5x8 bitmap of character, in this example a backslash
+    lcd_command(_BV(LCD_CGRAM)+TNSYMBOL*8);
+    lcd_putc(0b10001);
     lcd_putc(0b10101);
     lcd_putc(0b10101);
     lcd_putc(0b01110);
