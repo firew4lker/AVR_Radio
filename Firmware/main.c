@@ -112,7 +112,7 @@
 
 PLL pin    Direction       Function
 BO0        PLL -> Tuner    Not used
-BO1        PLL -> Tuner    Mute / IF output (0 = Mute / IF counter mode.
+BO1        PLL -> Tuner    Mute / IF output (0 = Mute / IF counter mode).
 BO2        PLL -> Tuner    Band selector (0 = FM; 1 = AM).
 BO3        PLL -> Tuner    Not used.
 BO4        PLL -> Tuner    Audio mode (0 = Stereo; 1 = Mono).
