@@ -218,12 +218,12 @@ int main(void){
 
     while(1){
 
-        if (bit_is_clear(UPSW_PIN,UPSW)){
-            if (scanmode==1){
+        if (bit_is_clear(UPSW_PIN,UPSW)){                     // If scan UP switch is pressed. Some debounce would me nice!
+            if (scanmode==1){                                 // If scanmode=1 (automatic scan), enter automatic scan loop.
                 tuned=0;
-                while(tuned==0){
+                while(tuned==0){                              // Loop until the PLL report it is tuned. Some exit from the loop strategy would be nice.
                     FMFrequency++;
-                    if (FMFrequency >= 1080) FMFrequency=875;
+                    if (FMFrequency >= 1080) FMFrequency=875; // if frequency reaches maximum fold to minimum.
                     tuned = PLL_Tune(FMFrequency);
                     lcdupdate();
                 };
@@ -235,12 +235,12 @@ int main(void){
             _delay_ms(100);
         };
 
-        if (bit_is_clear(DOWNSW_PIN,DOWNSW)){
-            if (scanmode==1){
+        if (bit_is_clear(DOWNSW_PIN,DOWNSW)){                 // If scan DOWN switch is pressed. Some debounce would me nice!
+            if (scanmode==1){                                 // If scanmode=1 (automatic scan), enter automatic scan loop.
                 tuned=0;
-                while(tuned==0){
+                while(tuned==0){                              // Loop until the PLL report it is tuned. Some exit from the loop strategy would be nice.
                     FMFrequency--;
-                    if (FMFrequency <= 875) FMFrequency=1080;
+                    if (FMFrequency <= 875) FMFrequency=1080; // if frequency reaches minimum fold to maximum.
                     tuned = PLL_Tune(FMFrequency);
                     lcdupdate();
                 };
@@ -252,7 +252,7 @@ int main(void){
             _delay_ms(100);
         };
 
-        if (bit_is_clear(SCANSW_PIN,SCANSW)){
+        if (bit_is_clear(SCANSW_PIN,SCANSW)){                   // If SCAN switch is pressed. Toggle the scan mode.
             scanmode ^= toggletn;
             _delay_ms(200);
         };
