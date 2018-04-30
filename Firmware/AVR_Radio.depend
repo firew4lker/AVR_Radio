@@ -40,13 +40,13 @@
 1524749676 /koko/AVR_Radio/Firmware/AVR_Radio/SanyoCCB.h
 	<inttypes.h>
 
-1524743520 source:/koko/AVR_Radio/Firmware/bit_manipulation.c
+1525076699 source:/koko/AVR_Radio/Firmware/bit_manipulation.c
 	<avr/io.h>
 	<stdlib.h>
 	<stdio.h>
 	"bit_manipulation.h"
 
-1524743511 /koko/AVR_Radio/Firmware/bit_manipulation.h
+1525076723 /koko/AVR_Radio/Firmware/bit_manipulation.h
 
 1334328161 source:/koko/AVR_Radio/Firmware/hd44780.c
 	<avr/pgmspace.h>
@@ -60,7 +60,7 @@
 
 1524737025 /koko/AVR_Radio/Firmware/hd44780_settings.h
 
-1525022206 source:/koko/AVR_Radio/Firmware/main.c
+1525076500 source:/koko/AVR_Radio/Firmware/main.c
 	<avr/io.h>
 	<avr/interrupt.h>
 	<stdlib.h>
@@ -82,7 +82,7 @@
 	"SanyoCCB.h"
 	"bit_manipulation.h"
 
-1524994428 source:/koko/AVR_Radio/Firmware/LC72131.c
+1525076719 source:/koko/AVR_Radio/Firmware/LC72131.c
 	<avr/io.h>
 	<inttypes.h>
 	<util/delay.h>

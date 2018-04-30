@@ -14,10 +14,10 @@ void digitalWrite(uint8_t pin, volatile uint8_t *port, uint8_t val)
         };
 }
 
-uint8_t digitalRead(uint8_t pin, volatile uint8_t *port)
+uint8_t digitalRead(uint8_t pin, uint8_t port)
 {
 
-        if (bit_is_clear(*port, pin)) {
+        if (bit_is_clear(port, pin)) {
                 return 0;
         } else {
                 return 1;

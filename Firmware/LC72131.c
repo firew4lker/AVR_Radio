@@ -67,7 +67,7 @@ uint8_t readByte() {
 	// Receive one byte from the CCB bus (MSB first)
 	for(int8_t i = 7; i >= 0; i--) {
 		digitalWrite(CL, &CL_PORT, 1); _delay_us(CCB_DELAY);
-		bitWrite(data, i, digitalRead(DI, &DI_PIN));
+		bitWrite(data, i, digitalRead(DI, DI_PIN));
 		digitalWrite(CL, &CL_PORT, 0); _delay_us(CCB_DELAY);
 	};
 
@@ -123,7 +123,7 @@ void ccb(uint8_t address, uint8_t *data, int8_t dataLength, uint8_t mode) {
  * it easier                                             *
 \*********************************************************/
 uint8_t diPinState() {
-	return digitalRead(DI, &DI_PIN);
+	return digitalRead(DI, DI_PIN);
 }
 
 

@@ -95,10 +95,10 @@
 #define DOWNSW_DDR   DDRB
 #define DOWNSW_PIN   PINB
 
-#define TUNESW       PB2    // Switch for FM/AM mode.
-#define TUNESW_PORT  PORTB
-#define TUNESW_DDR   DDRB
-#define TUNESW_PIN   PINB
+#define SCANSW       PB2    // Switch for manual or automatic scanning.
+#define SCANSW_PORT  PORTB
+#define SCANSW_DDR   DDRB
+#define SCANSW_PIN   PINB
 
 #define NONE    0   // Values used to the switch detection press function.
 #define UP      1
@@ -157,7 +157,7 @@ uint8_t pll_in1[3];  // IN1 consist of 3 bytes in total. Page 9 of the Datasheet
 uint8_t pll_in2[3];  // IN2 consist of 3 bytes in total. Page 9 of the Datasheet.
 
 // Initial frequencies for the PLL.
-volatile uint16_t FMFrequency = 978;   // MHz / 10
+volatile uint16_t FMFrequency = 1013;   // MHz / 10
 //volatile uint16_t AMFrequency = 73;    // KHz * 10
 
 uint8_t band = PLL_BAND_FM;
@@ -180,7 +180,7 @@ void utofix(uint16_t, char *);    // Function to convert an unsigned int to prin
 int main(void){
 
     uint8_t toggletn=(1^0);
-    uint8_t tunemode=0;
+    uint8_t scanmode=0;
 
     lcd_init();                   // LCD initialization.
     lcd_clrscr();                 // Clear the LCD.
@@ -199,8 +199,8 @@ int main(void){
     DOWNSW_DDR &=  ~(1<<DOWNSW);  // UP switch pin as Input.
     DOWNSW_PORT |= (1<<DOWNSW);   // UP switch pin pull-up resistor enabled.
 
-    TUNESW_DDR &=  ~(1<<TUNESW);  // UP switch pin as Input.
-    TUNESW_PORT |= (1<<TUNESW);   // UP switch pin pull-up resistor enabled.
+    SCANSW_DDR &=  ~(1<<SCANSW);  // UP switch pin as Input.
+    SCANSW_PORT |= (1<<SCANSW);   // UP switch pin pull-up resistor enabled.
 
 
     millis_init();                // Starting the time keeping function.
@@ -218,46 +218,51 @@ int main(void){
 
     while(1){
 
-        if (readsw()==UP && tunemode==1){
-            tuned=0;
-            while(tuned==0){
+        if (bit_is_clear(UPSW_PIN,UPSW)){
+            if (scanmode==1){
+                tuned=0;
+                while(tuned==0){
+                    FMFrequency++;
+                    if (FMFrequency >= 1080) FMFrequency=875;
+                    tuned = PLL_Tune(FMFrequency);
+                    lcdupdate();
+                };
+            } else {
                 FMFrequency++;
                 if (FMFrequency >= 1080) FMFrequency=875;
                 tuned = PLL_Tune(FMFrequency);
-                lcdupdate();
             };
-        } else if (readsw()==UP && tunemode==0){
-            FMFrequency++;
-            if (FMFrequency >= 1080) FMFrequency=875;
-            tuned = PLL_Tune(FMFrequency);
+            _delay_ms(100);
         };
 
-        if (readsw()==DOWN && tunemode==1){
-            tuned=0;
-            while(tuned==0){
+        if (bit_is_clear(DOWNSW_PIN,DOWNSW)){
+            if (scanmode==1){
+                tuned=0;
+                while(tuned==0){
+                    FMFrequency--;
+                    if (FMFrequency <= 875) FMFrequency=1080;
+                    tuned = PLL_Tune(FMFrequency);
+                    lcdupdate();
+                };
+            } else {
                 FMFrequency--;
                 if (FMFrequency <= 875) FMFrequency=1080;
                 tuned = PLL_Tune(FMFrequency);
-                lcdupdate();
             };
-        } else if (readsw()==DOWN && tunemode==0){
-            FMFrequency--;
-            if (FMFrequency <= 875) FMFrequency=1080;
-            tuned = PLL_Tune(FMFrequency);
+            _delay_ms(100);
         };
 
-        if (readsw()==TNMODE){
-            tunemode ^= toggletn;
+        if (bit_is_clear(SCANSW_PIN,SCANSW)){
+            scanmode ^= toggletn;
+            _delay_ms(200);
         };
 
-        if (tunemode==0){
+        if (scanmode==0){
             lcd_gotoxy(0,1);
             lcd_puts_P("MANUAL SCAN");
-            _delay_ms(200);
-        }else{
+        } else {
             lcd_gotoxy(0,1);
             lcd_puts_P("AUTO SCAN  ");
-            _delay_ms(200);
         };
 
         lcdupdate();
@@ -269,32 +274,6 @@ int main(void){
     return 0;
 }
 
-uint8_t readsw (){
-
-    if (digitalRead(UPSW,&UPSW_PIN)==0){
-        _delay_ms(10);  // Some debounce time.
-        if (digitalRead(UPSW,&UPSW_PIN)==0) {
-            return UP;
-        };
-    };
-
-    if (digitalRead(DOWNSW,&DOWNSW_PIN)==0){
-        _delay_ms(10);  // Some debounce time.
-        if (digitalRead(DOWNSW,&DOWNSW_PIN)==0) {
-            return DOWN;
-        };
-    };
-
-    if (digitalRead(TUNESW,&TUNESW_PIN)==0){
-        _delay_ms(10);  // Some debounce time.
-        if (digitalRead(TUNESW,&TUNESW_PIN)==0) {
-            return TNMODE;
-        };
-    };
-
-    return NONE;
-
-}
 
 void lcdupdate() {
 
@@ -314,7 +293,7 @@ void lcdupdate() {
 //        lcd_puts_P(" KHz ");
 //    };
 
-    if (digitalRead(STEREO,&STEREO_PIN)==0){
+    if (digitalRead(STEREO,STEREO_PIN)==0){
         lcd_gotoxy(13,0);
         lcd_putc('[');
         lcd_putc(STSYMBOL);
@@ -459,7 +438,7 @@ uint8_t PLL_Tune(uint16_t frequency) {
 
     _delay_ms(20); //Some delay to give time to the PLL tune output to set.
 
-    if (digitalRead(TUNED,&TUNED_PIN)==0){
+    if (digitalRead(TUNED,TUNED_PIN)==0){
         tuned=1;
     };
 
